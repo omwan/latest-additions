@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script type="text/javascript"
+            src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>
+    <script type="text/javascript" src="js/app.js"></script>
+</head>
+<body ng-app="app" ng-controller="controller">
+
+<a href="/api/spotify/auth">initalize, yo</a>
+
+<div ng-repeat="playlist in playlists.items">
+    {{playlist.name}}
+</div>
+
+<div ng-if="playlists.next !== null">
+    <a href="javascript:void(0)" ng-click="loadMorePlaylists()">load more</a>
+</div>
+
+<script src="js/controller.js"></script>
+</body>
+</html>
