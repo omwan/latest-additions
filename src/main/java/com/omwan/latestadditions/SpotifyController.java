@@ -54,7 +54,7 @@ public class SpotifyController {
             AuthorizationCodeCredentials authorizationCodeCredentials = authorizationCodeRequest.execute();
             spotifyApi.setAccessToken(authorizationCodeCredentials.getAccessToken());
             spotifyApi.setRefreshToken(authorizationCodeCredentials.getRefreshToken());
-            response.sendRedirect("/api/spotify/playlists");
+            response.sendRedirect("/api/spotify/userinfo");
         } catch (IOException | SpotifyWebApiException e) {
             throw new RuntimeException("Could not retrieve auth code credentials", e);
         }
