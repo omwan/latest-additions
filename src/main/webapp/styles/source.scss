@@ -1,0 +1,92 @@
+body {
+	background:#eee;
+	font:13px open sans;
+	height:auto;
+}
+
+.container {
+	position:relative;
+	overflow:hidden;
+	margin:auto;
+	padding-top:50px;
+	max-width:800px;
+}
+
+.input-form {
+	padding:50px 150px;
+	width:500px;
+	margin:auto;
+}
+
+.playlist-select {
+
+	.playlist-sort {
+		display:block;
+
+		md-radio-button, md-checkbox {
+			margin-bottom:5px;
+		}
+
+		md-checkbox {
+			float:right;
+		}
+
+		md-radio-button {
+			display:inline-block;
+			margin-right:20px;
+		}
+	}
+
+	.playlist-filter {
+		display:block;
+		margin-top:20px;
+		margin-bottom:-5px;
+	}
+
+	.playlist-list {
+		border:1px solid #eee;
+		height:200px;
+		overflow:scroll;
+		padding:0 5px;
+		margin-bottom:10px;
+	}
+}
+
+md-list-item {
+	margin:5px 0;
+
+	.md-list-item-inner>md-checkbox, 
+	md-list-item>md-checkbox, 
+	.md-secondary-container {
+		margin:0px;
+	}
+
+	.md-no-proxy, .md-no-style {
+		padding:0px;
+
+	}
+}
+
+md-list-item, 
+md-list-item .md-list-item-inner, 
+md-list-item .md-list-item-inner:before, 
+md-list-item:before {
+	min-height:0px;
+}
+
+md-checkbox {
+	margin:0px;
+
+	.md-icon {
+		transform: scale(0.8);
+	}
+}
+
+md-radio-button {
+	.md-on {
+		transform:scale(0);
+	}
+	.md-off {
+		transform: scale(0.8);
+	}
+}

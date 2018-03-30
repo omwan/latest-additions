@@ -27,3 +27,7 @@ nbdist/
 ### heroku ###
 .env
 Procfile
+
+### local dev ###
+mock_responses
+.sass-cache
