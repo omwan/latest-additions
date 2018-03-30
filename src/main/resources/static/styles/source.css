@@ -12,7 +12,7 @@ body {
 
 .input-form {
   padding: 50px 150px;
-  width: 500px;
+  max-width: 500px;
   margin: auto; }
 
 .playlist-select .playlist-sort {
@@ -34,30 +34,34 @@ body {
   overflow: scroll;
   padding: 0 5px;
   margin-bottom: 10px; }
-
-md-list-item {
-  margin: 5px 0; }
-  md-list-item .md-list-item-inner > md-checkbox,
-  md-list-item md-list-item > md-checkbox,
-  md-list-item .md-secondary-container {
-    margin: 0px; }
-  md-list-item .md-no-proxy, md-list-item .md-no-style {
+  .playlist-select .playlist-list .playlist-info {
+    color: #aaa;
+    margin-right: 15px;
+    float: right; }
+  .playlist-select .playlist-list ul {
+    margin: 0px;
     padding: 0px; }
-
-md-list-item,
-md-list-item .md-list-item-inner,
-md-list-item .md-list-item-inner:before,
-md-list-item:before {
-  min-height: 0px; }
+  .playlist-select .playlist-list li {
+    list-style-type: none;
+    display: block;
+    padding: 0px;
+    margin: 5px 0; }
 
 md-checkbox {
   margin: 0px; }
   md-checkbox .md-icon {
-    transform: scale(0.8); }
+    transform: scale(0.75);
+    margin-top: 2px; }
+  md-checkbox .md-label {
+    margin-left: 25px; }
 
 md-radio-button .md-on {
-  transform: scale(0); }
+  transform: scale(0);
+  margin-top: 2px; }
 md-radio-button .md-off {
-  transform: scale(0.8); }
+  transform: scale(0.75);
+  margin-top: 2px; }
+md-radio-button .md-label {
+  margin-left: 25px; }
 
 /*# sourceMappingURL=source.css.map */

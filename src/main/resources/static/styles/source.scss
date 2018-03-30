@@ -1,0 +1,122 @@
+body {
+	background:#eee;
+	font:13px open sans;
+	height:auto;
+}
+
+.container {
+	position:relative;
+	overflow:hidden;
+	margin:auto;
+	padding-top:50px;
+	max-width:800px;
+}
+
+.input-form {
+	padding:50px 150px;
+	max-width:500px;
+	margin:auto;
+}
+
+.playlist-select {
+
+	.playlist-sort {
+		display:block;
+
+		md-radio-button, md-checkbox {
+			margin-bottom:5px;
+		}
+
+		md-checkbox {
+			float:right;
+		}
+
+		md-radio-button {
+			display:inline-block;
+			margin-right:20px;
+		}
+	}
+
+	.playlist-filter {
+		display:block;
+		margin-top:20px;
+		margin-bottom:-5px;
+	}
+
+	.playlist-list {
+		border:1px solid #eee;
+		height:200px;
+		overflow:scroll;
+		padding:0 5px;
+		margin-bottom:10px;
+
+		.playlist-info {
+			color:#aaa;
+			margin-right:15px;
+			float:right;
+		}
+
+		ul {
+			margin:0px;
+			padding:0px;
+		}
+
+		li {
+			list-style-type:none;
+			display:block;
+			padding:0px;
+			margin:5px 0;
+		}
+	}
+}
+
+// md-list-item {
+// 	margin:5px 0;
+
+// 	.md-list-item-inner>md-checkbox, 
+// 	md-list-item>md-checkbox, 
+// 	.md-secondary, 
+// 	.md-secondary-container {
+// 		margin:0px;
+// 	}
+
+// 	.md-no-proxy, .md-no-style {
+// 		padding:0px;
+
+// 	}
+// }
+
+// md-list-item, 
+// md-list-item .md-list-item-inner, 
+// md-list-item .md-list-item-inner:before, 
+// md-list-item:before {
+// 	min-height:0px;
+// }
+
+md-checkbox {
+	margin:0px;
+
+	.md-icon {
+		transform: scale(0.75);
+		margin-top:2px;
+	}
+
+	.md-label {
+		margin-left:25px;
+	}
+}
+
+md-radio-button {
+	.md-on {
+		transform:scale(0);
+		margin-top:2px;
+	}
+	.md-off {
+		transform: scale(0.75);
+		margin-top:2px;
+	}
+
+	.md-label {
+		margin-left:25px;
+	}
+}

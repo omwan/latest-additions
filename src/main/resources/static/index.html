@@ -18,6 +18,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-animate.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-aria.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-messages.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-sanitize/1.6.9/angular-sanitize.min.js"></script>
 
     <!-- Angular Material Library -->
     <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.8/angular-material.min.js"></script>
@@ -32,12 +33,12 @@
     <div class="container">
 
         <center>
-            <md-button class="md-raised md-primary auth" ng-if="playlists === null" href="/api/spotify/init">
+            <md-button class="md-raised md-primary auth" ng-if="playlists === null || playlists === ''" href="/api/spotify/auth">
                 <i class="fa fa-spotify"></i> authorize
             </md-button>
         </center>
 
-        <md-content class="input-form" ng-if="playlists !== null">
+        <md-content class="input-form" ng-if="playlists !== null && playlists !== ''">
 
             <md-input-container>
                 <label>Playlist Name</label>
@@ -48,6 +49,8 @@
                 <label>Number of Songs</label>
                 <input ng-model="numTracks">
             </md-input-container>
+
+            <!-- <md-list-item> -->
 
             <div class="playlist-select">
 
@@ -75,20 +78,27 @@
                 </md-input-container>
 
                 <div class="playlist-list">
-                    <md-list-item ng-repeat="playlist in playlists.items | orderBy:playlistSort:playlistSortReverse | filter:{name:playlistFilter}">
-                        <md-checkbox ng-checked="exists(playlist.uri, selectedPlaylists)" ng-click="toggle(playlist.uri, selectedPlaylists)" aria-label="playlist.name"></md-checkbox>
+                    <ul>
+                        <li ng-repeat="playlist in playlists.items | orderBy:playlistSort:playlistSortReverse | filter:{name:playlistFilter}">
+                            <md-checkbox ng-checked="exists(playlist.uri, selectedPlaylists)" ng-click="toggle(playlist.uri, selectedPlaylists)" aria-label="playlist.name">
 
-                        {{playlist.name}} |
+                                {{playlist.name}} |&nbsp;
 
-                        <span ng-if="playlist.owner.displayName !== null">
-                            {{playlist.owner.displayName}}
-                        </span>
+                                <span ng-if="playlist.owner.displayName !== null">
+                                    {{playlist.owner.displayName}}
+                                </span>
 
-                        <span ng-if="playlist.owner.displayName === null">
-                            {{playlist.owner.id}}
-                        </span>
+                                <span ng-if="playlist.owner.displayName === null">
+                                    {{playlist.owner.id}}
+                                </span>
+                            </md-checkbox>
 
-                    </md-list-item>
+                            <a href="javascript:void(0)" class="playlist-info" ng-click="getPlaylistDetails(playlist.uri, $event)" aria-label="playlist info for {{name}}">
+                                <i class="fa fa-info-circle"></i>
+                            </a>
+
+                        </li>
+                    </ul>
                 </div>
 
                 <center>
