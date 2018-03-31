@@ -1,14 +1,13 @@
-package com.omwan.latestadditions.config;
+package com.omwan.latestadditions.component;
 
 import com.wrapper.spotify.SpotifyApi;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import java.net.URI;
 
-@Configuration
-public class SpotifyConfig {
+@Component
+public class SpotifyApiComponent {
 
     @Value("${spotify.client}")
     private String spotifyClient;
@@ -19,8 +18,7 @@ public class SpotifyConfig {
     @Value("${spotify.redirect.uri}")
     private String spotifyRedirectURI;
 
-    @Bean(name = "spotify")
-    public SpotifyApi spotifyApi() {
+    public SpotifyApi getSpotifyApi() {
         return new SpotifyApi.Builder()
                 .setClientId(spotifyClient)
                 .setClientSecret(spotifyClientSecret)

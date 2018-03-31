@@ -1,6 +1,7 @@
 package com.omwan.latestadditions.utils;
 
 
+import com.omwan.latestadditions.component.UriComponent;
 import com.omwan.latestadditions.dto.PlaylistURIWrapper;
 import mockit.Tested;
 import org.junit.Before;
@@ -10,14 +11,14 @@ import static junit.framework.TestCase.assertEquals;
 
 //import static org.junit.Assert.assertEquals;
 
-public class URIUtilsTest {
+public class URIComponentTest {
 
     @Tested
-    private URIUtils uriUtils;
+    private UriComponent uriComponent;
 
     @Before
     public void setup() {
-        this.uriUtils = new URIUtils();
+        this.uriComponent = new UriComponent();
     }
 
     @Test
@@ -25,7 +26,7 @@ public class URIUtilsTest {
         String userId = "userId";
         String playlistId = "playlistId";
         String uri = String.format("spotify:user:%s:playlist:%s", userId, playlistId);
-        PlaylistURIWrapper uriWrapper = uriUtils.buildPlaylistURI(uri);
+        PlaylistURIWrapper uriWrapper = uriComponent.buildPlaylistURI(uri);
         assertEquals(userId, uriWrapper.getUserId());
         assertEquals(playlistId, uriWrapper.getPlaylistId());
     }
@@ -33,6 +34,6 @@ public class URIUtilsTest {
     @Test(expected = IllegalArgumentException.class)
     public void testBuildPlaylistURIMalformedURI() {
         String uri = "";
-        uriUtils.buildPlaylistURI(uri);
+        uriComponent.buildPlaylistURI(uri);
     }
 }

@@ -1,10 +1,10 @@
-package com.omwan.latestadditions.utils;
+package com.omwan.latestadditions.component;
 
 import com.omwan.latestadditions.dto.PlaylistURIWrapper;
 import org.springframework.stereotype.Component;
 
 @Component
-public class URIUtils {
+public class UriComponent {
 
     public PlaylistURIWrapper buildPlaylistURI(String uri) {
         String expectedFormat = "spotify:user:(?s)(.*):playlist:(?s)(.*)";

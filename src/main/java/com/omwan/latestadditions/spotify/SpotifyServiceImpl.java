@@ -1,7 +1,8 @@
 package com.omwan.latestadditions.spotify;
 
+import com.omwan.latestadditions.component.SpotifyApiComponent;
+import com.omwan.latestadditions.component.UriComponent;
 import com.omwan.latestadditions.dto.PlaylistURIWrapper;
-import com.omwan.latestadditions.utils.URIUtils;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.exceptions.detailed.UnauthorizedException;
@@ -13,10 +14,10 @@ import com.wrapper.spotify.requests.authorization.authorization_code.Authorizati
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
 import com.wrapper.spotify.requests.data.AbstractDataRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
@@ -29,11 +30,14 @@ import java.util.List;
 public class SpotifyServiceImpl implements SpotifyService {
 
     @Autowired
-    @Qualifier("spotify")
-    private SpotifyApi spotifyApi;
+    private SpotifyApiComponent spotifyApiComponent;
 
     @Autowired
-    private URIUtils uriUtils;
+    private UriComponent uriComponent;
+
+    @Autowired
+    @SuppressWarnings("SpringJavaAutowiringInspection")
+    private HttpSession session;
 
     /**
      * Make authorization request for API usage.
@@ -48,6 +52,7 @@ public class SpotifyServiceImpl implements SpotifyService {
                 "playlist-modify-public",
                 "playlist-read-collaborative");
 
+        SpotifyApi spotifyApi = spotifyApiComponent.getSpotifyApi();
         AuthorizationCodeUriRequest authorizationCodeUriRequest = spotifyApi.authorizationCodeUri()
                 .scope(String.join(", ", scopes))
                 .show_dialog(true)
@@ -69,12 +74,13 @@ public class SpotifyServiceImpl implements SpotifyService {
      */
     @Override
     public void setToken(String token, HttpServletResponse response) {
+        SpotifyApi spotifyApi = spotifyApiComponent.getSpotifyApi();
         AuthorizationCodeRequest authorizationCodeRequest = spotifyApi.authorizationCode(token)
                 .build();
         try {
             AuthorizationCodeCredentials authorizationCodeCredentials = authorizationCodeRequest.execute();
-            spotifyApi.setAccessToken(authorizationCodeCredentials.getAccessToken());
-            spotifyApi.setRefreshToken(authorizationCodeCredentials.getRefreshToken());
+            session.setAttribute("ACCESS_TOKEN", authorizationCodeCredentials.getAccessToken());
+            session.setAttribute("REFRESH_TOKEN", authorizationCodeCredentials.getRefreshToken());
             response.sendRedirect("/");
         } catch (IOException | SpotifyWebApiException e) {
             throw new RuntimeException("Could not retrieve auth code credentials", e);
@@ -90,6 +96,12 @@ public class SpotifyServiceImpl implements SpotifyService {
      */
     @Override
     public Paging<PlaylistSimplified> getUserPlaylists(int limit, int offset) {
+        SpotifyApi spotifyApi = getApiWithTokens();
+
+        if (spotifyApi == null) {
+            return null;
+        }
+
         AbstractDataRequest usersPlaylistsRequest = spotifyApi.getListOfCurrentUsersPlaylists()
                 .limit(limit)
                 .offset(offset)
@@ -109,14 +121,36 @@ public class SpotifyServiceImpl implements SpotifyService {
                 "externalUrls", "href", "images", "name", "owner", ",tracks.total,",
                 "uri", "isCollaborative", "isPublicAccess"));
 
-        PlaylistURIWrapper playlistURIWrapper = uriUtils.buildPlaylistURI(playlistURI);
+        PlaylistURIWrapper playlistURIWrapper = uriComponent.buildPlaylistURI(playlistURI);
         String userId = playlistURIWrapper.getUserId();
         String playlistId = playlistURIWrapper.getPlaylistId();
+
+        SpotifyApi spotifyApi = getApiWithTokens();
+
+        if (spotifyApi == null) {
+            return null;
+        }
 
         AbstractDataRequest playlistDetailsRequest = spotifyApi.getPlaylist(userId, playlistId)
                 .fields(fields)
                 .build();
-        return executeRequest(playlistDetailsRequest, "Unable to retrieve playlist");
+        return executeRequest(playlistDetailsRequest, "Unable to retrieve playlist details");
+    }
+
+    private SpotifyApi getApiWithTokens() {
+        SpotifyApi spotifyApi = spotifyApiComponent.getSpotifyApi();
+
+        Object accessToken = session.getAttribute("ACCESS_TOKEN");
+        Object refreshToken = session.getAttribute("REFRESH_TOKEN");
+
+        if (accessToken == null || refreshToken == null) {
+            return null;
+        }
+
+        spotifyApi.setAccessToken(accessToken.toString());
+        spotifyApi.setRefreshToken(refreshToken.toString());
+
+        return spotifyApi;
     }
 
     /**
@@ -129,10 +163,6 @@ public class SpotifyServiceImpl implements SpotifyService {
      */
     private <T> T executeRequest(AbstractDataRequest requestBuilder,
                                  String errorMessage) {
-        if (spotifyApi.getAccessToken() == null) {
-            return null;
-        }
-
         try {
             return requestBuilder.execute();
         } catch (UnauthorizedException e) {
@@ -147,12 +177,16 @@ public class SpotifyServiceImpl implements SpotifyService {
      * Refresh access token for spotify api.
      */
     private void refreshToken() {
+        SpotifyApi spotifyApi = spotifyApiComponent.getSpotifyApi();
+        spotifyApi.setRefreshToken(session.getAttribute("REFRESH_TOKEN").toString());
+
         try {
             AuthorizationCodeCredentials authorizationCodeCredentials = spotifyApi.authorizationCodeRefresh()
                     .build()
                     .execute();
-            spotifyApi.setAccessToken(authorizationCodeCredentials.getAccessToken());
-            spotifyApi.setRefreshToken(authorizationCodeCredentials.getRefreshToken());
+
+            session.setAttribute("ACCESS_TOKEN", authorizationCodeCredentials.getAccessToken());
+            session.setAttribute("REFRESH_TOKEN", authorizationCodeCredentials.getAccessToken());
 
             System.out.println(String.format("Token successfully refreshed, expires in %s",
                     authorizationCodeCredentials.getExpiresIn()));
