@@ -35,10 +35,12 @@ app.controller('controller', ['$scope', '$http', '$mdDialog',
                 }
             })
             .then(function (response) {
-                var origPlaylists = $scope.playlists.items;
-                $scope.playlists = response.data;
-                origPlaylists.push.apply(origPlaylists, $scope.playlists.items);
-                $scope.playlists.items = origPlaylists;
+                if (response.data !== null || response.data !== "") {
+                    var origPlaylists = $scope.playlists.items;
+                    $scope.playlists = response.data;
+                    origPlaylists.push.apply(origPlaylists, $scope.playlists.items);
+                    $scope.playlists.items = origPlaylists;
+                }
             });
         } else {
             return null;
@@ -67,15 +69,16 @@ app.controller('controller', ['$scope', '$http', '$mdDialog',
         if (uri in playlistDetails) {
             $scope.playlist = playlistDetails[uri];
         } else {
-            // $http.get("../mock_responses/playlist_details.json")
             $http.get("/api/spotify/playlistdetails", {
                 "params": {
                     "uri": uri
                 }
             })
             .then(function (response) {
-                playlistDetails[uri] = response.data;
-                $scope.playlist = response.data;
+                if (response.data !== null || response.data !== "") {
+                    playlistDetails[uri] = response.data;
+                    $scope.playlist = response.data;
+                }
             });
         }
     }

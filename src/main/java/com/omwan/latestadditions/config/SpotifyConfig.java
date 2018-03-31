@@ -1,4 +1,4 @@
-package com.omwan.latestadditions;
+package com.omwan.latestadditions.config;
 
 import com.wrapper.spotify.SpotifyApi;
 import org.springframework.beans.factory.annotation.Value;

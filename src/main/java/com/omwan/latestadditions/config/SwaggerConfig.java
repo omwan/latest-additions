@@ -1,4 +1,4 @@
-package com.omwan.latestadditions;
+package com.omwan.latestadditions.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
