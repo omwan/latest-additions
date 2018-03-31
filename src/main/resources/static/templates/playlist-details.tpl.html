@@ -1,33 +1,50 @@
-<md-dialog aria-label="Mango (Fruit)">
-    <form>
+<md-dialog aria-label="Details for playlist {{playlist.name}}" class="playlist-details-dialog">
 
-        <md-dialog-content>
-            <div class="md-dialog-content" style="width:500px;">
-                <table cellpadding=0 cellspacing=0 class="playlist-details"><tr>
-                    <td class="album-art" width="200" height="200">
-                        <img src="{{playlist.images[0].url}}" width=100%>
-                    </td>
-                    <td class="title-owner">
-                        <div class="playlist-name">{{playlist.name}}</div>
-                        <div class="playlist-owner">
-                            <span ng-if="playlist.owner.displayName !== null">
-                                {{playlist.owner.displayName}}
-                            </span>
+    <md-dialog-content layout-padding="">
 
-                            <span ng-if="playlist.owner.displayName === null">
-                                {{playlist.owner.id}}
-                            </span>
-                        </div>
-                    </td>
-                </tr></table>
-                <div ng-bind-html="playlist.description"></div>
-            </div>
-        </md-dialog-content>
+        <table cellpadding=0 cellspacing=0 class="playlist-details" width=100%><tr>
+            <td class="album-art">
+                <img src="{{playlist.images[0].url}}" ng-if="playlist.images.length > 0">
+                <img src="../assets/spotify_black.png" ng-if="playlist.images.length == 0">
+            </td>
+            <td class="title-owner">
+                <div class="playlist-name">{{playlist.name}}</div>
+                <div class="playlist-owner">
+                    <span ng-if="playlist.owner.displayName !== null">
+                        {{playlist.owner.displayName}}
+                    </span>
 
-        <md-dialog-actions layout="row">
-            <md-button ng-click="hide()">
-                close
-            </md-button>
-        </md-dialog-actions>
-    </form>
+                    <span ng-if="playlist.owner.displayName === null">
+                        {{playlist.owner.id}}
+                    </span>
+                </div>
+            </td>
+        </tr></table>
+
+        <div class="playlist-description"><center>
+            <p>
+                {{playlist.tracks.total}} tracks &middot;
+                <span ng-if="playlist.isPublicAccess">Public</span>
+                <span ng-if="!playlist.isPublicAccess">Private</span> &middot; 
+                <span ng-if="playlist.isCollaborative">Collaborative &middot; </span>
+                <a href="{{playlist.externalUrls.externalUrls.spotify}}" target="_blank">Open in Spotify</a>
+            </p>
+
+            <p ng-bind-html="playlist.description" ng-if="playlist.description !== null"></p>
+            <p ng-if="playlist.description === null">No description provided.</p>
+        </center></div>
+
+        <span ng-repeat="track in playlist.tracks.items">
+            {{track.track.name}}
+        </span>
+
+
+    </md-dialog-content>
+
+    <md-dialog-actions layout="row">
+        <md-button ng-click="hide()">
+            close
+        </md-button>
+    </md-dialog-actions>
+
 </md-dialog>

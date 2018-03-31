@@ -5,15 +5,22 @@ body {
 
 .container {
   position: relative;
-  overflow: hidden;
   margin: auto;
-  padding-top: 50px;
-  max-width: 800px; }
+  padding-top: 50px; }
 
 .input-form {
-  padding: 50px 150px;
-  max-width: 500px;
-  margin: auto; }
+  padding-top: 50px;
+  max-width: 800px;
+  margin: auto;
+  background: #fff; }
+  .input-form md-content.form-content {
+    max-width: 500px;
+    margin: auto;
+    background: #fff; }
+
+.gen-playlist-details {
+  overflow: hidden;
+  height: 75px; }
 
 .playlist-select .playlist-sort {
   display: block; }
@@ -47,6 +54,39 @@ body {
     padding: 0px;
     margin: 5px 0; }
 
+md-dialog.playlist-details-dialog {
+  width: 500px; }
+  md-dialog.playlist-details-dialog md-dialog-actions {
+    border-top: 1px solid #eee; }
+  md-dialog.playlist-details-dialog .playlist-details {
+    margin-bottom: 20px;
+    height: 200px; }
+    md-dialog.playlist-details-dialog .playlist-details td.album-art {
+      height: 200px;
+      width: 200px; }
+      md-dialog.playlist-details-dialog .playlist-details td.album-art img {
+        display: block;
+        height: 100%;
+        width: 100%; }
+    md-dialog.playlist-details-dialog .playlist-details td.title-owner {
+      background: #eee;
+      padding: 20px;
+      box-sizing: border-box;
+      text-align: center; }
+      md-dialog.playlist-details-dialog .playlist-details td.title-owner .playlist-name {
+        font-weight: bold;
+        font-size: 20px; }
+      md-dialog.playlist-details-dialog .playlist-details td.title-owner .playlist-owner {
+        font-style: italic; }
+    md-dialog.playlist-details-dialog .playlist-details .playlist-description {
+      text-align: center; }
+
+.submission {
+  padding: 10px;
+  border-top: 1px solid #eee;
+  margin-top: 50px;
+  text-align: right; }
+
 md-checkbox {
   margin: 0px; }
   md-checkbox .md-icon {
@@ -63,5 +103,18 @@ md-radio-button .md-off {
   margin-top: 2px; }
 md-radio-button .md-label {
   margin-left: 25px; }
+
+@media screen and (max-width: 991px) {
+  md-dialog.playlist-details-dialog {
+    width: auto;
+    max-width: 80%; }
+
+  .playlist-details {
+    max-height: 100px; }
+    .playlist-details td.title-owner .playlist-name {
+      font-size: 15px; }
+    .playlist-details td.album-art {
+      height: 100px;
+      width: 100px; } }
 
 /*# sourceMappingURL=source.css.map */

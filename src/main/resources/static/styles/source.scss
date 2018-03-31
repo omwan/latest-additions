@@ -6,16 +6,26 @@ body {
 
 .container {
 	position:relative;
-	overflow:hidden;
 	margin:auto;
 	padding-top:50px;
-	max-width:800px;
 }
 
 .input-form {
-	padding:50px 150px;
-	max-width:500px;
+	padding-top:50px;
+	max-width:800px;
 	margin:auto;
+	background:#fff;
+
+	md-content.form-content {
+		max-width:500px;
+		margin:auto;
+		background:#fff;
+	}
+}
+
+.gen-playlist-details {
+	overflow:hidden;
+	height:75px;
 }
 
 .playlist-select {
@@ -70,28 +80,60 @@ body {
 	}
 }
 
-// md-list-item {
-// 	margin:5px 0;
+md-dialog.playlist-details-dialog {
+	width:500px;
 
-// 	.md-list-item-inner>md-checkbox, 
-// 	md-list-item>md-checkbox, 
-// 	.md-secondary, 
-// 	.md-secondary-container {
-// 		margin:0px;
-// 	}
+	md-dialog-content {
+		// padding:20px;
+	}
 
-// 	.md-no-proxy, .md-no-style {
-// 		padding:0px;
+	md-dialog-actions {
+		border-top:1px solid #eee;
+	}
 
-// 	}
-// }
+	.playlist-details {
+		margin-bottom:20px;
+		height:200px;
 
-// md-list-item, 
-// md-list-item .md-list-item-inner, 
-// md-list-item .md-list-item-inner:before, 
-// md-list-item:before {
-// 	min-height:0px;
-// }
+		td.album-art {
+			height:200px;
+			width:200px;
+
+			img {
+				display:block;
+				height:100%;
+				width:100%;
+			}
+		}
+
+		td.title-owner {
+			background:#eee;
+			padding:20px;
+			box-sizing:border-box;
+			text-align:center;
+
+			.playlist-name {
+				font-weight:bold;
+				font-size:20px;
+			}
+
+			.playlist-owner {
+				font-style:italic;
+			}
+		}
+
+		.playlist-description {
+			text-align:center;
+		}
+	}
+}
+
+.submission {
+	padding:10px;
+	border-top:1px solid #eee;
+	margin-top:50px;
+	text-align:right;
+}
 
 md-checkbox {
 	margin:0px;
@@ -118,5 +160,25 @@ md-radio-button {
 
 	.md-label {
 		margin-left:25px;
+	}
+}
+
+@media screen and (max-width:991px) {
+	md-dialog.playlist-details-dialog {
+		width:auto;
+		max-width:80%;
+	}
+
+	.playlist-details {
+		max-height:100px;
+
+		td.title-owner .playlist-name {
+			font-size:15px;
+		}
+
+		td.album-art {
+			height:100px;
+			width:100px;
+		}
 	}
 }

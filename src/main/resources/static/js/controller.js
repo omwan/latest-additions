@@ -1,4 +1,5 @@
-app.controller('controller', ['$scope', '$http', '$mdDialog', function ($scope, $http, $mdDialog) {
+app.controller('controller', ['$scope', '$http', '$mdDialog', 
+    function ($scope, $http, $mdDialog) {
 
     $scope.playlists = null;
     $scope.selectedPlaylists = [];
@@ -9,6 +10,12 @@ app.controller('controller', ['$scope', '$http', '$mdDialog', function ($scope, 
     $scope.playlistFilter = "";
 
     $scope.playlistDetails = {};
+
+    $scope.submissionForm = {
+        playlistName: "Latest Additions",
+        numTracks: 25,
+        overwriteExisting: false
+    }
 
     var _getPlaylists = function () {
         $http.get("/api/spotify/playlists")
@@ -50,16 +57,17 @@ app.controller('controller', ['$scope', '$http', '$mdDialog', function ($scope, 
             targetEvent: event,
             clickOutsideToClose:true
         });
-    }
+    };
 
     function DialogController($scope, $mdDialog, playlistDetails, uri) {
         $scope.hide = function() {
             $mdDialog.hide();
         };
 
-        console.log(playlistDetails, uri);
-
-        if (!(uri in playlistDetails)) {
+        if (uri in playlistDetails) {
+            $scope.playlist = playlistDetails[uri];
+        } else {
+            // $http.get("../mock_responses/playlist_details.json")
             $http.get("/api/spotify/playlistdetails", {
                 "params": {
                     "uri": uri
@@ -69,8 +77,6 @@ app.controller('controller', ['$scope', '$http', '$mdDialog', function ($scope, 
                 playlistDetails[uri] = response.data;
                 $scope.playlist = response.data;
             });
-        } else {
-            $scope.playlist = playlistDetails[uri];
         }
     }
 
@@ -88,6 +94,9 @@ app.controller('controller', ['$scope', '$http', '$mdDialog', function ($scope, 
         return list.indexOf(item) > -1;
     };
 
-    _getPlaylists();
+
+    if ($scope.playlists === null || $scope.playlists === "") {
+        _getPlaylists();
+    }
 
 }]);
