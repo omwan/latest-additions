@@ -118,8 +118,8 @@ public class SpotifyServiceImpl implements SpotifyService {
     @Override
     public Playlist getPlaylistDetails(String playlistURI) {
         String fields = String.join(",", Arrays.asList("description",
-                "externalUrls", "href", "images", "name", "owner", ",tracks.total,",
-                "uri", "isCollaborative", "isPublicAccess"));
+                "external_urls", "href", "images", "name", "owner",
+                "tracks.total", "uri", "isCollaborative", "isPublicAccess"));
 
         PlaylistURIWrapper playlistURIWrapper = uriComponent.buildPlaylistURI(playlistURI);
         String userId = playlistURIWrapper.getUserId();
@@ -167,7 +167,11 @@ public class SpotifyServiceImpl implements SpotifyService {
             return requestBuilder.execute();
         } catch (UnauthorizedException e) {
             refreshToken();
-            return null;
+            try {
+                return requestBuilder.execute();
+            } catch (IOException | SpotifyWebApiException ex) {
+                throw new RuntimeException(errorMessage, e);
+            }
         } catch (IOException | SpotifyWebApiException e) {
             throw new RuntimeException(errorMessage, e);
         }
