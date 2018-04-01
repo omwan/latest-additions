@@ -120,13 +120,13 @@ app.controller('controller', ['$scope', '$http', '$mdDialog',
                 + ". See source code at: https://github.com/omwan/latest-addition"
         }
         $http.post("/api/playlist/build", $scope.submissionForm);
+        // console.log($scope.submissionForm.description);
         $scope.submissionForm.description = null;
     };
 
     var _getExistingPlaylists = function() {
-        // $scope.existingPlaylists = ["sdfsdfs", "sdfsdf"];
-        // $scope.existingPlaylists = [];
         $http.get("/api/playlist/existing")
+        // $http.get("../mock_responses/existing_playlists.json")
         .then(function(response) {
             $scope.existingPlaylists = response.data;
         });

@@ -1,20 +1,22 @@
 // general
 body {
-	background:#eee;
+	background:#f5f5f5;
 	font:13px open sans;
 	height:auto;
+	display: flex;
+  	flex-direction: column;
 }
 
 .container {
 	position:relative;
 	margin:auto;
-	padding:50px 0;
+	width:100%;
 }
 
 // submission input
 .input-form {
 	overflow:hidden;
-	max-width:1000px;
+	width:900px;
 	margin:auto;
 	background:#fff;
 	border-radius:5px;
@@ -117,6 +119,15 @@ body {
 			color:#555;
 		}
 	}
+
+	.load-more {
+		text-align:center;
+		margin:10px 0;
+
+		a {
+			color:#888;
+		}
+	}
 }
 
 // playlist details popup
@@ -184,6 +195,11 @@ md-dialog.playlist-details-dialog {
 	}
 }
 
+.footer {
+	padding:20px 0;
+	text-align:center;
+}
+
 
 md-checkbox {
 	margin:0px;
@@ -214,13 +230,10 @@ md-radio-button {
 }
 
 // mobile styles
-@media screen and (max-width:991px) {
+@media screen and (max-width:900px) {
 
-	.new-playlist-details, .playlist-select {
-		float:none;
-		display:block;
+	.input-form {
 		width:100%;
-		padding:0 20px;
 	}
 
 	.new-playlist-details md-input-container {
@@ -247,5 +260,16 @@ md-radio-button {
 			height:100px;
 			width:100px;
 		}
+	}
+}
+
+@media screen and (max-width:768px) {
+	.new-playlist-details, .playlist-select {
+		float:none;
+		display:block;
+		width:100%;
+		max-width:500px;
+		margin:auto;
+		padding:0 20px;
 	}
 }
