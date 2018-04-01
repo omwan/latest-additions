@@ -7,11 +7,12 @@ import mockit.Tested;
 import org.junit.Before;
 import org.junit.Test;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertEquals;
 
-//import static org.junit.Assert.assertEquals;
-
-public class URIComponentTest {
+/**
+ * Unit tests for UriComponent.
+ */
+public class UriComponentTest {
 
     @Tested
     private UriComponent uriComponent;
@@ -21,6 +22,10 @@ public class URIComponentTest {
         this.uriComponent = new UriComponent();
     }
 
+    /**
+     * Assert that a PlaylistUri instance can be built from a URI string
+     * with the correct fields.
+     */
     @Test
     public void testBuildPlaylistURI() {
         String userId = "userId";
@@ -31,6 +36,10 @@ public class URIComponentTest {
         assertEquals(playlistId, uriWrapper.getPlaylistId());
     }
 
+    /**
+     * Assert that trying to build a PlaylistUri instance with a malformed
+     * string throws the appropriate exception.
+     */
     @Test(expected = IllegalArgumentException.class)
     public void testBuildPlaylistURIMalformedURI() {
         String uri = "";

@@ -2,6 +2,10 @@ package com.omwan.latestadditions.dto;
 
 import java.util.Map;
 
+/**
+ * DTO representing specifications for creating/updating a
+ * "Latest Additions" playlist.
+ */
 public class BuildPlaylistRequest {
 
     private Map<String, Integer> playlistUris;

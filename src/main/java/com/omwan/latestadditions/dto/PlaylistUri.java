@@ -1,5 +1,8 @@
 package com.omwan.latestadditions.dto;
 
+/**
+ * Wrapper class for playlist URI strings.
+ */
 public class PlaylistUri {
 
     private String userId;

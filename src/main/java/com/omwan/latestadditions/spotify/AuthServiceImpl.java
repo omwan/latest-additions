@@ -16,6 +16,9 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Implementation of services relating to authentication.
+ */
 @Service
 public class AuthServiceImpl implements AuthService {
 

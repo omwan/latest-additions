@@ -8,6 +8,9 @@ import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
 
 import java.util.List;
 
+/**
+ * Services pertaining to playlists.
+ */
 public interface PlaylistService {
 
     Paging<PlaylistSimplified> getUserPlaylists(int limit, int offset);

@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * Controller for authentication-related services.
+ */
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {

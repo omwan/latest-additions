@@ -9,6 +9,9 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Component to manage functionalities relating to UserPlaylist objects.
+ */
 @Component
 public class UserPlaylistComponent {
 
@@ -18,12 +21,24 @@ public class UserPlaylistComponent {
     @Autowired
     private UriComponent uriComponent;
 
+    /**
+     * Retrieve URIs of all saved playlists for a given user.
+     *
+     * @param userId user ID to retrieve playlists for
+     * @return list of playlist URIs.
+     */
     public List<PlaylistUri> getPlaylistsForUser(String userId) {
         return userPlaylistRepository.findByUserId(userId).stream()
                 .map(userPlaylist -> uriComponent.buildPlaylistURI(userPlaylist.getPlaylistUri()))
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Save a playlist URI for a given user.
+     *
+     * @param userId      user ID to save playlist for
+     * @param playlistUri playlist to save
+     */
     public void saveUserPlaylist(String userId, String playlistUri) {
         UserPlaylist userPlaylist = new UserPlaylist();
         userPlaylist.setUserId(userId);

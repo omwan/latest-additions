@@ -14,6 +14,9 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.URI;
 
+/**
+ * Component to manage common functionalities relating to the Spotify API.
+ */
 @Component
 public class SpotifyApiComponent {
 
@@ -38,6 +41,12 @@ public class SpotifyApiComponent {
                 .build();
     }
 
+    /**
+     * Build instance of SpotifyApi with access and refresh tokens set
+     * from session attributes.
+     *
+     * @return SpotifyApi instance with access + refresh tokens
+     */
     public SpotifyApi getApiWithTokens() {
         SpotifyApi spotifyApi = getSpotifyApi();
 
@@ -50,6 +59,11 @@ public class SpotifyApiComponent {
         return spotifyApi;
     }
 
+    /**
+     * Retrieve user ID of current user, and save as a session attribute.
+     *
+     * @return user ID of current user
+     */
     public String getCurrentUserId() {
         if (session.getAttribute("USER_ID") == null) {
             SpotifyApi spotifyApi = getApiWithTokens();
@@ -72,7 +86,7 @@ public class SpotifyApiComponent {
      * @return value of executed request
      */
     public <T> T executeRequest(AbstractDataRequest requestBuilder,
-                                 String errorMessage) {
+                                String errorMessage) {
         try {
             return requestBuilder.execute();
         } catch (UnauthorizedException e) {

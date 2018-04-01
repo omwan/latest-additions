@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Services pertaining to spotify API.
+ * Implementation of services pertaining to playlists.
  */
 @Service
 public class PlaylistServiceImpl implements PlaylistService {
@@ -90,6 +90,12 @@ public class PlaylistServiceImpl implements PlaylistService {
         return spotifyApiComponent.executeRequest(playlistDetailsRequest, errorMessage);
     }
 
+    /**
+     * Get all playlists that the current user has previously created
+     * using this application.
+     *
+     * @return list of playlists
+     */
     @Override
     public List<Playlist> getExistingPlaylists() {
         if (session.getAttribute("ACCESS_TOKEN") == null) {
@@ -114,6 +120,12 @@ public class PlaylistServiceImpl implements PlaylistService {
         return existingPlaylists;
     }
 
+    /**
+     * Create or update latest additions playlist with the specified requirements.
+     *
+     * @param request playlist specifications
+     * @return URI of created or updated playlist
+     */
     @Override
     public PlaylistUri buildLatestAdditionsPlaylist(BuildPlaylistRequest request) {
         List<PlaylistUri> playlists = request.getPlaylistUris().keySet().stream()
@@ -137,6 +149,13 @@ public class PlaylistServiceImpl implements PlaylistService {
         }
     }
 
+    /**
+     * Build a mapping of playlists to a LinkedList of their most recent tracks.
+     *
+     * @param request   playlist specifications
+     * @param playlists playlists to retrieve tracks for
+     * @return mapping of playlists to their tracks
+     */
     private Map<PlaylistUri, LinkedList<PlaylistTrack>> getPlaylistTracks(BuildPlaylistRequest request,
                                                                           List<PlaylistUri> playlists) {
         Map<PlaylistUri, LinkedList<PlaylistTrack>> playlistTracks = new HashMap<>();
@@ -155,6 +174,13 @@ public class PlaylistServiceImpl implements PlaylistService {
         return playlistTracks;
     }
 
+    /**
+     * Generate a list of "latest additions" tracks from the given set of playlists.
+     *
+     * @param request        playlist specifications
+     * @param playlistTracks mapping of playlist URIs to their tracks
+     * @return list of tracks for latest additions playlist
+     */
     private List<PlaylistTrack> getLatestAdditions(BuildPlaylistRequest request,
                                                    Map<PlaylistUri, LinkedList<PlaylistTrack>> playlistTracks) {
         List<PlaylistTrack> latestAdditionsTracks = new ArrayList<>();
@@ -197,6 +223,14 @@ public class PlaylistServiceImpl implements PlaylistService {
         return latestAdditionsTracks;
     }
 
+    /**
+     * Overwrite an existing playlist with the "latest additions" tracks.
+     *
+     * @param playlistToOverwrite playlist to overwrite
+     * @param trackUris           list of track URIs for playlist
+     * @param userId              user ID of current user
+     * @return URI of overwritten playlist
+     */
     private PlaylistUri overwriteExistingLatestAdditions(String playlistToOverwrite,
                                                          String[] trackUris,
                                                          String userId) {
@@ -212,6 +246,14 @@ public class PlaylistServiceImpl implements PlaylistService {
         return playlistUri;
     }
 
+    /**
+     * Create a new playlist containing the "latest additions" tracks.
+     *
+     * @param trackUris list of track URIs for playlist
+     * @param userId    user ID of current user
+     * @param request   playlist specifications
+     * @return URI of newly created playlist
+     */
     private PlaylistUri createNewLatestAdditions(String[] trackUris,
                                                  String userId,
                                                  BuildPlaylistRequest request) {
@@ -240,6 +282,14 @@ public class PlaylistServiceImpl implements PlaylistService {
         return playlistUri;
     }
 
+    /**
+     * Retrieve the tracks for an individual playlist.
+     *
+     * @param uriWrapper URI of playlist to retrieve tracks for
+     * @param limit      maximum number of tracks to retrieve
+     * @param offset     offset to start retrieving tracks from
+     * @return array of playlist tracks
+     */
     private PlaylistTrack[] getTracksForPlaylist(PlaylistUri uriWrapper, int limit, int offset) {
         SpotifyApi spotifyApi = spotifyApiComponent.getApiWithTokens();
 
