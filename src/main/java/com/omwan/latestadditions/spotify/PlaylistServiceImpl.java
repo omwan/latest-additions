@@ -10,8 +10,8 @@ import com.wrapper.spotify.model_objects.specification.Paging;
 import com.wrapper.spotify.model_objects.specification.Playlist;
 import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
 import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
-import com.wrapper.spotify.model_objects.specification.User;
 import com.wrapper.spotify.requests.data.AbstractDataRequest;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -63,7 +63,8 @@ public class PlaylistServiceImpl implements PlaylistService {
                 .limit(limit)
                 .offset(offset)
                 .build();
-        return spotifyApiComponent.executeRequest(usersPlaylistsRequest, "Unable to retrieve user playlists");
+        return spotifyApiComponent.executeRequest(usersPlaylistsRequest,
+                "Unable to retrieve user playlists");
     }
 
     /**
@@ -85,7 +86,32 @@ public class PlaylistServiceImpl implements PlaylistService {
                 .getPlaylist(playlistURIWrapper.getUserId(), playlistURIWrapper.getPlaylistId())
                 .fields(fields)
                 .build();
-        return spotifyApiComponent.executeRequest(playlistDetailsRequest, "Unable to retrieve playlist details");
+        String errorMessage = String.format("Unable to retrieve playlist details for playlist %s", playlistURI);
+        return spotifyApiComponent.executeRequest(playlistDetailsRequest, errorMessage);
+    }
+
+    @Override
+    public List<Playlist> getExistingPlaylists() {
+        if (session.getAttribute("ACCESS_TOKEN") == null) {
+            return null;
+        }
+
+        String userId = spotifyApiComponent.getCurrentUserId();
+        List<PlaylistUri> playlistsUris = userPlaylistComponent.getPlaylistsForUser(userId);
+
+        List<Playlist> existingPlaylists = new ArrayList<>();
+
+        for (PlaylistUri uri : playlistsUris) {
+            SpotifyApi spotifyApi = spotifyApiComponent.getApiWithTokens();
+            AbstractDataRequest getPlaylistRequest = spotifyApi.getPlaylist(userId, uri.getPlaylistId())
+                    .fields("name,tracks(total),uri,id")
+                    .build();
+            String errorMessage = String.format("Unable to retrieve existing playlists for user %s", userId);
+            Playlist playlist = spotifyApiComponent.executeRequest(getPlaylistRequest, errorMessage);
+            existingPlaylists.add(playlist);
+        }
+
+        return existingPlaylists;
     }
 
     @Override
@@ -98,14 +124,14 @@ public class PlaylistServiceImpl implements PlaylistService {
 
         List<PlaylistTrack> latestAdditionsTracks = getLatestAdditions(request, playlistTracks);
 
-        String userId = getUserId();
+        String userId = spotifyApiComponent.getCurrentUserId();
         String[] trackUris = latestAdditionsTracks.stream()
                 .map(playlistTrack -> playlistTrack.getTrack().getUri())
                 .collect(Collectors.toList())
                 .toArray(new String[latestAdditionsTracks.size()]);
 
         if (request.isOverwriteExisting()) {
-            return overwriteExistingLatestAdditions(trackUris, userId);
+            return overwriteExistingLatestAdditions(request.getPlaylistToOverwrite(), trackUris, userId);
         } else {
             return createNewLatestAdditions(trackUris, userId, request);
         }
@@ -171,14 +197,18 @@ public class PlaylistServiceImpl implements PlaylistService {
         return latestAdditionsTracks;
     }
 
-    private PlaylistUri overwriteExistingLatestAdditions(String[] trackUris,
+    private PlaylistUri overwriteExistingLatestAdditions(String playlistToOverwrite,
+                                                         String[] trackUris,
                                                          String userId) {
         SpotifyApi spotifyApi = spotifyApiComponent.getApiWithTokens();
-        PlaylistUri playlistUri = userPlaylistComponent.getPlaylistUriForUser(userId);
+        PlaylistUri playlistUri = uriComponent.buildPlaylistURI(playlistToOverwrite);
         AbstractDataRequest replaceTracksRequest = spotifyApi
                 .replacePlaylistsTracks(userId, playlistUri.getPlaylistId(), trackUris)
                 .build();
-        spotifyApiComponent.executeRequest(replaceTracksRequest, "ugh");
+
+        String errorMessage = String.format("Unable to replace tracks for playlist %s", playlistUri);
+        spotifyApiComponent.executeRequest(replaceTracksRequest, errorMessage);
+
         return playlistUri;
     }
 
@@ -188,45 +218,39 @@ public class PlaylistServiceImpl implements PlaylistService {
         SpotifyApi spotifyApi = spotifyApiComponent.getApiWithTokens();
         AbstractDataRequest createPlaylistRequest = spotifyApi
                 .createPlaylist(userId, request.getPlaylistName())
-                .description("Autogenerated playlist")
+                .description(request.getDescription())
                 .collaborative(request.isCollaborative())
                 .public_(request.isPublic())
                 .build();
-        Playlist latestAdditions = spotifyApiComponent.executeRequest(createPlaylistRequest, "ugh");
+
+        String createPlaylistErrorMessage = String.format("Unable to create playlist with given parameters %s",
+                ToStringBuilder.reflectionToString(request));
+        Playlist latestAdditions = spotifyApiComponent.executeRequest(createPlaylistRequest,
+                createPlaylistErrorMessage);
+
         PlaylistUri playlistUri = uriComponent.buildPlaylistURI(latestAdditions.getUri());
         AbstractDataRequest addTracksRequest = spotifyApi
                 .addTracksToPlaylist(userId, playlistUri.getPlaylistId(), trackUris)
                 .build();
-        spotifyApiComponent.executeRequest(addTracksRequest, "ugh");
-        userPlaylistComponent.saveUserPlaylist(userId, playlistUri.toString());
-        return playlistUri;
-    }
 
-    private String getUserId() {
-        if (session.getAttribute("USER_ID") == null) {
-            SpotifyApi spotifyApi = spotifyApiComponent.getApiWithTokens();
-            AbstractDataRequest userRequest = spotifyApi.getCurrentUsersProfile()
-                    .build();
-            User user = spotifyApiComponent.executeRequest(userRequest, "ugh");
-            session.setAttribute("USER_ID", user.getId());
-            return user.getId();
-        } else {
-            return session.getAttribute("USER_ID").toString();
-        }
+        String addTracksErrorMessage = String.format("Unable to add tracks to playlist %s", playlistUri);
+        spotifyApiComponent.executeRequest(addTracksRequest, addTracksErrorMessage);
+        userPlaylistComponent.saveUserPlaylist(userId, playlistUri.toString());
+
+        return playlistUri;
     }
 
     private PlaylistTrack[] getTracksForPlaylist(PlaylistUri uriWrapper, int limit, int offset) {
         SpotifyApi spotifyApi = spotifyApiComponent.getApiWithTokens();
 
-        if (spotifyApi == null) {
-            throw new RuntimeException("ugh");
-        }
         AbstractDataRequest trackRequest = spotifyApi
                 .getPlaylistsTracks(uriWrapper.getUserId(), uriWrapper.getPlaylistId())
                 .limit(limit)
                 .offset(offset)
                 .build();
-        Paging<PlaylistTrack> tracks = spotifyApiComponent.executeRequest(trackRequest, "ugh");
+
+        String errorMessage = String.format("Unable to retrieve tracks for playlist %s", uriWrapper.toString());
+        Paging<PlaylistTrack> tracks = spotifyApiComponent.executeRequest(trackRequest, errorMessage);
         return tracks.getItems();
     }
 

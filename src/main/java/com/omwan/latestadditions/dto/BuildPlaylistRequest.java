@@ -1,7 +1,5 @@
 package com.omwan.latestadditions.dto;
 
-import io.swagger.models.auth.In;
-
 import java.util.Map;
 
 public class BuildPlaylistRequest {
@@ -13,6 +11,7 @@ public class BuildPlaylistRequest {
     private String description;
     private boolean isPublic;
     private boolean isCollaborative;
+    private String playlistToOverwrite;
 
     public Map<String, Integer> getPlaylistUris() {
         return playlistUris;
@@ -69,5 +68,13 @@ public class BuildPlaylistRequest {
 
     public void setCollaborative(boolean collaborative) {
         isCollaborative = collaborative;
+    }
+
+    public String getPlaylistToOverwrite() {
+        return playlistToOverwrite;
+    }
+
+    public void setPlaylistToOverwrite(String playlistToOverwrite) {
+        this.playlistToOverwrite = playlistToOverwrite;
     }
 }

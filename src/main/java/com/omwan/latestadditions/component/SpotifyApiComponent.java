@@ -4,6 +4,7 @@ import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.exceptions.detailed.UnauthorizedException;
 import com.wrapper.spotify.model_objects.credentials.AuthorizationCodeCredentials;
+import com.wrapper.spotify.model_objects.specification.User;
 import com.wrapper.spotify.requests.data.AbstractDataRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,6 +48,19 @@ public class SpotifyApiComponent {
         spotifyApi.setRefreshToken(refreshToken);
 
         return spotifyApi;
+    }
+
+    public String getCurrentUserId() {
+        if (session.getAttribute("USER_ID") == null) {
+            SpotifyApi spotifyApi = getApiWithTokens();
+            AbstractDataRequest userRequest = spotifyApi.getCurrentUsersProfile()
+                    .build();
+            User user = executeRequest(userRequest, "ugh");
+            session.setAttribute("USER_ID", user.getId());
+            return user.getId();
+        } else {
+            return session.getAttribute("USER_ID").toString();
+        }
     }
 
     /**

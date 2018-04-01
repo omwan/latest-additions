@@ -6,6 +6,9 @@ import com.omwan.latestadditions.mongo.UserPlaylistRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 public class UserPlaylistComponent {
 
@@ -15,9 +18,10 @@ public class UserPlaylistComponent {
     @Autowired
     private UriComponent uriComponent;
 
-    public PlaylistUri getPlaylistUriForUser(String userId) {
-        UserPlaylist userPlaylist = userPlaylistRepository.findByUserId(userId);
-        return uriComponent.buildPlaylistURI(userPlaylist.getPlaylistUri());
+    public List<PlaylistUri> getPlaylistsForUser(String userId) {
+        return userPlaylistRepository.findByUserId(userId).stream()
+                .map(userPlaylist -> uriComponent.buildPlaylistURI(userPlaylist.getPlaylistUri()))
+                .collect(Collectors.toList());
     }
 
     public void saveUserPlaylist(String userId, String playlistUri) {

@@ -62,6 +62,10 @@ body {
 		display:inline-block;
 		margin-right:20px;
 	}
+
+	md-radio-button {
+		margin-bottom:5px;
+	}
 }
 
 // playlist selection
@@ -216,11 +220,15 @@ md-radio-button {
 		float:none;
 		display:block;
 		width:100%;
+		padding:0 20px;
+	}
+
+	.new-playlist-details md-input-container {
+		width:calc(50% - 10px);
 	}
 
 	md-dialog.playlist-details-dialog {
-		width:auto;
-		max-width:80%;
+		width:80%;
 	}
 
 	.playlist-select .playlist-sort md-checkbox {

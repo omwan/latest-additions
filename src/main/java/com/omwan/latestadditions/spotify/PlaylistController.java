@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
  * Controller for application.
  */
@@ -31,6 +33,11 @@ public class PlaylistController {
     @RequestMapping(method = RequestMethod.GET, value = "/details")
     public Playlist getPlaylistDetails(@RequestParam(name = "uri") String playlistURI) {
         return playlistService.getPlaylistDetails(playlistURI);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/existing")
+    public List<Playlist> getExistingPlaylists() {
+        return playlistService.getExistingPlaylists();
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/build")

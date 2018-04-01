@@ -56,34 +56,56 @@
                         <h2>Playlist Details</h2>
                         <div class="overwrite-check">
                             <md-checkbox ng-model="submissionForm.overwriteExisting">Overwrite existing playlist?</md-checkbox>
-                            <p>(Note that this feature only works if you have already created a playlist with this app.)</p>
                         </div>
-                        <div style="height:75px;overflow:hidden;">
-                            <md-input-container>
-                                <label>Playlist Name</label>
-                                <input ng-model="submissionForm.playlistName" ng-disabled="submissionForm.overwriteExisting" required>
-                            </md-input-container>
 
-                            <md-input-container>
-                                <label>Number of Songs</label>
-                                <input ng-model="submissionForm.numTracks" type="number" min="0" required>
-                            </md-input-container>
+                        <div ng-if="!submissionForm.overwriteExisting">
+                            <div style="height:75px;overflow:hidden;">
+                                <md-input-container>
+                                    <label>Playlist Name</label>
+                                    <input ng-model="submissionForm.playlistName" ng-disabled="submissionForm.overwriteExisting" required>
+                                </md-input-container>
+
+                                <md-input-container>
+                                    <label>Number of Songs</label>
+                                    <input ng-model="submissionForm.numTracks" type="number" min="0" required>
+                                </md-input-container>
+                            </div>
+                            <div class="new-playlist-checkboxes">
+                                <ul class="checkbox-list">
+                                    <li>
+                                        <md-checkbox ng-model="submissionForm.isPublic" ng-disabled="submissionForm.overwriteExisting">public</md-checkbox>
+                                    </li>
+                                    <li>
+                                        <md-checkbox ng-model="submissionForm.isCollaborative" ng-disabled="submissionForm.overwriteExisting">collaborative</md-checkbox>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div>
+                                <md-input-container style="width:100%;margin-top:40px;">
+                                    <label>Playlist Description</label>
+                                    <textarea name="description" type="text" ng-model="submissionForm.description" ng-disabled="submissionForm.overwriteExisting" max-rows="2"></textarea>
+                                </md-input-container>
+                            </div>
                         </div>
-                        <div>
-                            <ul class="checkbox-list">
-                                <li>
-                                    <md-checkbox ng-model="submissionForm.isPublic" ng-disabled="submissionForm.overwriteExisting">public</md-checkbox>
-                                </li>
-                                <li>
-                                    <md-checkbox ng-model="submissionForm.isCollaborative" ng-disabled="submissionForm.overwriteExisting">collaborative</md-checkbox>
-                                </li>
-                            </ul>
+
+                        <div ng-if="submissionForm.overwriteExisting && existingPlaylists.length > 0">
+                            <div>
+                                <md-radio-group ng-model="submissionForm.playlistToOverwrite">
+                                    <md-radio-button ng-value="playlist.uri" ng-model="submissionForm.playlistToOverwrite" ng-repeat="playlist in existingPlaylists">
+                                        {{playlist.name}} | {{playlist.tracks.total}} tracks
+                                    </md-radio-button>
+                                </md-radio-group>
+                            </div>
+
+                            <div style="margin-top:20px;">
+                                <md-input-container>
+                                    <label>Number of Songs</label>
+                                    <input ng-model="submissionForm.numTracks" type="number" min="0" required>
+                                </md-input-container>
+                            </div>
                         </div>
-                        <div>
-                            <md-input-container style="width:100%;margin-top:40px;">
-                                <label>Playlist Description</label>
-                                <textarea name="description" type="text" required ng-model="submissionForm.description" ng-disabled="submissionForm.overwriteExisting" max-rows="2"></textarea>
-                            </md-input-container>
+                        <div ng-if="submissionForm.overwriteExisting && existingPlaylists.length == 0">
+                            No existing playlists for the current user. You must have created at least one playlist with this app to use this feature.
                         </div>
                     </div><!--new-playlist-details-->
 

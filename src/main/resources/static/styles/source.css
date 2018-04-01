@@ -41,6 +41,8 @@ body {
   .new-playlist-details .checkbox-list li {
     display: inline-block;
     margin-right: 20px; }
+  .new-playlist-details md-radio-button {
+    margin-bottom: 5px; }
 
 .playlist-select {
   width: 50%;
@@ -137,11 +139,14 @@ md-radio-button .md-label {
   .new-playlist-details, .playlist-select {
     float: none;
     display: block;
-    width: 100%; }
+    width: 100%;
+    padding: 0 20px; }
+
+  .new-playlist-details md-input-container {
+    width: calc(50% - 10px); }
 
   md-dialog.playlist-details-dialog {
-    width: auto;
-    max-width: 80%; }
+    width: 80%; }
 
   .playlist-select .playlist-sort md-checkbox {
     float: none;

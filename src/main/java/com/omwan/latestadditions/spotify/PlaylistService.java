@@ -6,17 +6,15 @@ import com.wrapper.spotify.model_objects.specification.Paging;
 import com.wrapper.spotify.model_objects.specification.Playlist;
 import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
 
-import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 public interface PlaylistService {
-
-//    void authorize(HttpServletResponse response);
-//
-//    void setToken(String token, HttpServletResponse response);
 
     Paging<PlaylistSimplified> getUserPlaylists(int limit, int offset);
 
     Playlist getPlaylistDetails(String playlistURI);
+
+    List<Playlist> getExistingPlaylists();
 
     PlaylistUri buildLatestAdditionsPlaylist(BuildPlaylistRequest request);
 }
