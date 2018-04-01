@@ -1,11 +1,11 @@
 package com.omwan.latestadditions.dto;
 
-public class PlaylistURIWrapper {
+public class PlaylistUri {
 
     private String userId;
     private String playlistId;
 
-    public PlaylistURIWrapper() {
+    public PlaylistUri() {
 
     }
 
@@ -23,5 +23,10 @@ public class PlaylistURIWrapper {
 
     public void setPlaylistId(String playlistId) {
         this.playlistId = playlistId;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("spotify:user:%s:playlist:%s", userId, playlistId);
     }
 }

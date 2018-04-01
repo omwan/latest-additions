@@ -2,7 +2,7 @@ package com.omwan.latestadditions.utils;
 
 
 import com.omwan.latestadditions.component.UriComponent;
-import com.omwan.latestadditions.dto.PlaylistURIWrapper;
+import com.omwan.latestadditions.dto.PlaylistUri;
 import mockit.Tested;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,7 +26,7 @@ public class URIComponentTest {
         String userId = "userId";
         String playlistId = "playlistId";
         String uri = String.format("spotify:user:%s:playlist:%s", userId, playlistId);
-        PlaylistURIWrapper uriWrapper = uriComponent.buildPlaylistURI(uri);
+        PlaylistUri uriWrapper = uriComponent.buildPlaylistURI(uri);
         assertEquals(userId, uriWrapper.getUserId());
         assertEquals(playlistId, uriWrapper.getPlaylistId());
     }

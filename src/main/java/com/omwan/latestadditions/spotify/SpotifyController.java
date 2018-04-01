@@ -1,9 +1,12 @@
 package com.omwan.latestadditions.spotify;
 
+import com.omwan.latestadditions.dto.BuildPlaylistRequest;
+import com.omwan.latestadditions.dto.PlaylistUri;
 import com.wrapper.spotify.model_objects.specification.Paging;
 import com.wrapper.spotify.model_objects.specification.Playlist;
 import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -41,5 +44,10 @@ public class SpotifyController {
     @RequestMapping(method = RequestMethod.GET, value = "/playlistdetails")
     public Playlist getPlaylistDetails(@RequestParam(name = "uri") String playlistURI) {
         return spotifyService.getPlaylistDetails(playlistURI);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/playlists")
+    public PlaylistUri buildLatestAdditionsPlaylist(@RequestBody BuildPlaylistRequest request) {
+        return spotifyService.buildLatestAdditionsPlaylist(request);
     }
 }

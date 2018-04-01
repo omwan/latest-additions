@@ -1,12 +1,12 @@
 package com.omwan.latestadditions.component;
 
-import com.omwan.latestadditions.dto.PlaylistURIWrapper;
+import com.omwan.latestadditions.dto.PlaylistUri;
 import org.springframework.stereotype.Component;
 
 @Component
 public class UriComponent {
 
-    public PlaylistURIWrapper buildPlaylistURI(String uri) {
+    public PlaylistUri buildPlaylistURI(String uri) {
         String expectedFormat = "spotify:user:(?s)(.*):playlist:(?s)(.*)";
         if (!uri.matches(expectedFormat)) {
             throw new IllegalArgumentException("Malformed playlist uri");
@@ -14,7 +14,7 @@ public class UriComponent {
 
         String[] values = uri.split(":");
 
-        PlaylistURIWrapper playlistURIWrapper = new PlaylistURIWrapper();
+        PlaylistUri playlistURIWrapper = new PlaylistUri();
         playlistURIWrapper.setUserId(values[2]);
         playlistURIWrapper.setPlaylistId(values[4]);
 
