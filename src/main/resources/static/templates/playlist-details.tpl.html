@@ -8,7 +8,9 @@
                 <img src="../assets/spotify_black.png" ng-if="playlist.images.length == 0">
             </td>
             <td class="title-owner">
-                <div class="playlist-name">{{playlist.name}}</div>
+                <div class="playlist-name">
+                    {{playlist.name}}
+                </div>
                 <div class="playlist-owner">
                     <span ng-if="playlist.owner.displayName !== null">
                         {{playlist.owner.displayName}}
