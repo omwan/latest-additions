@@ -5,24 +5,16 @@ import com.omwan.latestadditions.component.UriComponent;
 import com.omwan.latestadditions.dto.BuildPlaylistRequest;
 import com.omwan.latestadditions.dto.PlaylistUri;
 import com.wrapper.spotify.SpotifyApi;
-import com.wrapper.spotify.exceptions.SpotifyWebApiException;
-import com.wrapper.spotify.exceptions.detailed.UnauthorizedException;
-import com.wrapper.spotify.model_objects.credentials.AuthorizationCodeCredentials;
 import com.wrapper.spotify.model_objects.specification.Paging;
 import com.wrapper.spotify.model_objects.specification.Playlist;
 import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
 import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
 import com.wrapper.spotify.model_objects.specification.User;
-import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
-import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
 import com.wrapper.spotify.requests.data.AbstractDataRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -35,7 +27,7 @@ import java.util.stream.Collectors;
  * Services pertaining to spotify API.
  */
 @Service
-public class SpotifyServiceImpl implements SpotifyService {
+public class PlaylistServiceImpl implements PlaylistService {
 
     @Autowired
     private SpotifyApiComponent spotifyApiComponent;
@@ -46,54 +38,6 @@ public class SpotifyServiceImpl implements SpotifyService {
     @Autowired
     @SuppressWarnings("SpringJavaAutowiringInspection")
     private HttpSession session;
-
-    /**
-     * Make authorization request for API usage.
-     *
-     * @param response to redirect to auth request page.
-     */
-    @Override
-    public void authorize(HttpServletResponse response) {
-        List<String> scopes = Arrays.asList(
-                "playlist-read-private",
-                "playlist-modify-private",
-                "playlist-modify-public",
-                "playlist-read-collaborative");
-
-        SpotifyApi spotifyApi = spotifyApiComponent.getSpotifyApi();
-        AuthorizationCodeUriRequest authorizationCodeUriRequest = spotifyApi.authorizationCodeUri()
-                .scope(String.join(", ", scopes))
-                .show_dialog(true)
-                .build();
-        URI redirectURI = authorizationCodeUriRequest.execute();
-
-        try {
-            response.sendRedirect(redirectURI.toString());
-        } catch (IOException e) {
-            throw new RuntimeException("Could not redirect to permissions page", e);
-        }
-    }
-
-    /**
-     * Set the access token for the spotifyApi instance as given by the redirect.
-     *
-     * @param token    access token
-     * @param response to redirect to application homepage after receiving auth token.
-     */
-    @Override
-    public void setToken(String token, HttpServletResponse response) {
-        SpotifyApi spotifyApi = spotifyApiComponent.getSpotifyApi();
-        AuthorizationCodeRequest authorizationCodeRequest = spotifyApi.authorizationCode(token)
-                .build();
-        try {
-            AuthorizationCodeCredentials authorizationCodeCredentials = authorizationCodeRequest.execute();
-            session.setAttribute("ACCESS_TOKEN", authorizationCodeCredentials.getAccessToken());
-            session.setAttribute("REFRESH_TOKEN", authorizationCodeCredentials.getRefreshToken());
-            response.sendRedirect("/");
-        } catch (IOException | SpotifyWebApiException e) {
-            throw new RuntimeException("Could not retrieve auth code credentials", e);
-        }
-    }
 
     /**
      * Get playlists for the current user.
@@ -108,14 +52,14 @@ public class SpotifyServiceImpl implements SpotifyService {
             return null;
         }
 
-        SpotifyApi spotifyApi = getApiWithTokens();
+        SpotifyApi spotifyApi = spotifyApiComponent.getApiWithTokens();
 
         AbstractDataRequest usersPlaylistsRequest = spotifyApi
                 .getListOfCurrentUsersPlaylists()
                 .limit(limit)
                 .offset(offset)
                 .build();
-        return executeRequest(usersPlaylistsRequest, "Unable to retrieve user playlists");
+        return spotifyApiComponent.executeRequest(usersPlaylistsRequest, "Unable to retrieve user playlists");
     }
 
     /**
@@ -131,13 +75,13 @@ public class SpotifyServiceImpl implements SpotifyService {
                 "tracks.total", "uri", "isCollaborative", "isPublicAccess"));
         PlaylistUri playlistURIWrapper = uriComponent.buildPlaylistURI(playlistURI);
 
-        SpotifyApi spotifyApi = getApiWithTokens();
+        SpotifyApi spotifyApi = spotifyApiComponent.getApiWithTokens();
 
         AbstractDataRequest playlistDetailsRequest = spotifyApi
                 .getPlaylist(playlistURIWrapper.getUserId(), playlistURIWrapper.getPlaylistId())
                 .fields(fields)
                 .build();
-        return executeRequest(playlistDetailsRequest, "Unable to retrieve playlist details");
+        return spotifyApiComponent.executeRequest(playlistDetailsRequest, "Unable to retrieve playlist details");
     }
 
     @Override
@@ -222,41 +166,41 @@ public class SpotifyServiceImpl implements SpotifyService {
 
     private PlaylistUri overwriteExistingLatestAdditions(String[] trackUris,
                                                          String userId) {
-        SpotifyApi spotifyApi = getApiWithTokens();
+        SpotifyApi spotifyApi = spotifyApiComponent.getApiWithTokens();
         String uri = userId.concat(userId);
         PlaylistUri playlistUri = uriComponent.buildPlaylistURI(uri);
         AbstractDataRequest replaceTracksRequest = spotifyApi
                 .replacePlaylistsTracks(userId, playlistUri.getPlaylistId(), trackUris)
                 .build();
-        executeRequest(replaceTracksRequest, "ugh");
+        spotifyApiComponent.executeRequest(replaceTracksRequest, "ugh");
         return playlistUri;
     }
 
     private PlaylistUri createNewLatestAdditions(String[] trackUris,
                                                  String userId,
                                                  BuildPlaylistRequest request) {
-        SpotifyApi spotifyApi = getApiWithTokens();
+        SpotifyApi spotifyApi = spotifyApiComponent.getApiWithTokens();
         AbstractDataRequest createPlaylistRequest = spotifyApi
                 .createPlaylist(userId, request.getPlaylistName())
                 .description("Autogenerated playlist")
                 .collaborative(request.isCollaborative())
                 .public_(request.isPublic())
                 .build();
-        Playlist latestAdditions = executeRequest(createPlaylistRequest, "ugh");
+        Playlist latestAdditions = spotifyApiComponent.executeRequest(createPlaylistRequest, "ugh");
         PlaylistUri playlistUri = uriComponent.buildPlaylistURI(latestAdditions.getUri());
         AbstractDataRequest addTracksRequest = spotifyApi
                 .addTracksToPlaylist(userId, playlistUri.getPlaylistId(), trackUris)
                 .build();
-        executeRequest(addTracksRequest, "ugh");
+        spotifyApiComponent.executeRequest(addTracksRequest, "ugh");
         return playlistUri;
     }
 
     private String getUserId() {
         if (session.getAttribute("USER_ID") == null) {
-            SpotifyApi spotifyApi = getApiWithTokens();
+            SpotifyApi spotifyApi = spotifyApiComponent.getApiWithTokens();
             AbstractDataRequest userRequest = spotifyApi.getCurrentUsersProfile()
                     .build();
-            User user = executeRequest(userRequest, "ugh");
+            User user = spotifyApiComponent.executeRequest(userRequest, "ugh");
             session.setAttribute("USER_ID", user.getId());
             return user.getId();
         } else {
@@ -265,7 +209,7 @@ public class SpotifyServiceImpl implements SpotifyService {
     }
 
     private PlaylistTrack[] getTracksForPlaylist(PlaylistUri uriWrapper, int limit, int offset) {
-        SpotifyApi spotifyApi = getApiWithTokens();
+        SpotifyApi spotifyApi = spotifyApiComponent.getApiWithTokens();
 
         if (spotifyApi == null) {
             throw new RuntimeException("ugh");
@@ -275,66 +219,9 @@ public class SpotifyServiceImpl implements SpotifyService {
                 .limit(limit)
                 .offset(offset)
                 .build();
-        Paging<PlaylistTrack> tracks = executeRequest(trackRequest, "ugh");
+        Paging<PlaylistTrack> tracks = spotifyApiComponent.executeRequest(trackRequest, "ugh");
         return tracks.getItems();
     }
 
-    private SpotifyApi getApiWithTokens() {
-        SpotifyApi spotifyApi = spotifyApiComponent.getSpotifyApi();
-
-        String accessToken = session.getAttribute("ACCESS_TOKEN").toString();
-        String refreshToken = session.getAttribute("REFRESH_TOKEN").toString();
-
-        spotifyApi.setAccessToken(accessToken);
-        spotifyApi.setRefreshToken(refreshToken);
-
-        return spotifyApi;
-    }
-
-    /**
-     * Helper to execute API requests.
-     *
-     * @param requestBuilder request to execute
-     * @param errorMessage   error message to log in event of failure
-     * @param <T>            return type of request
-     * @return value of executed request
-     */
-    private <T> T executeRequest(AbstractDataRequest requestBuilder,
-                                 String errorMessage) {
-        try {
-            return requestBuilder.execute();
-        } catch (UnauthorizedException e) {
-            refreshToken();
-            try {
-                return requestBuilder.execute();
-            } catch (IOException | SpotifyWebApiException ex) {
-                throw new RuntimeException(errorMessage, e);
-            }
-        } catch (IOException | SpotifyWebApiException e) {
-            throw new RuntimeException(errorMessage, e);
-        }
-    }
-
-    /**
-     * Refresh access token for spotify api.
-     */
-    private void refreshToken() {
-        SpotifyApi spotifyApi = spotifyApiComponent.getSpotifyApi();
-        spotifyApi.setRefreshToken(session.getAttribute("REFRESH_TOKEN").toString());
-
-        try {
-            AuthorizationCodeCredentials authorizationCodeCredentials = spotifyApi.authorizationCodeRefresh()
-                    .build()
-                    .execute();
-
-            session.setAttribute("ACCESS_TOKEN", authorizationCodeCredentials.getAccessToken());
-            session.setAttribute("REFRESH_TOKEN", authorizationCodeCredentials.getAccessToken());
-
-            System.out.println(String.format("Token successfully refreshed, expires in %s",
-                    authorizationCodeCredentials.getExpiresIn()));
-        } catch (IOException | SpotifyWebApiException e) {
-            throw new RuntimeException("Unable to refresh access token", e);
-        }
-    }
 
 }

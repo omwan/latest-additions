@@ -8,11 +8,11 @@ import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
 
 import javax.servlet.http.HttpServletResponse;
 
-public interface SpotifyService {
+public interface PlaylistService {
 
-    void authorize(HttpServletResponse response);
-
-    void setToken(String token, HttpServletResponse response);
+//    void authorize(HttpServletResponse response);
+//
+//    void setToken(String token, HttpServletResponse response);
 
     Paging<PlaylistSimplified> getUserPlaylists(int limit, int offset);
 
