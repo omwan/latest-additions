@@ -21,7 +21,7 @@ body {
 .input-header {
   border-bottom: 1px solid #eee;
   padding: 30px 0 20px 0;
-  margin-bottom: 40px; }
+  margin-bottom: 20px; }
   .input-header h1 {
     text-align: center;
     margin: 0px; }
@@ -70,6 +70,10 @@ body {
       color: #aaa;
       margin-right: 15px;
       float: right; }
+    .playlist-select .playlist-list .fa {
+      margin-top: 2px;
+      font-size: 18px;
+      color: #555; }
 
 md-dialog.playlist-details-dialog {
   width: 500px; }
@@ -100,7 +104,7 @@ md-dialog.playlist-details-dialog {
 .submission {
   padding: 10px;
   border-top: 1px solid #eee;
-  margin-top: 50px;
+  margin-top: 30px;
   text-align: right; }
 
 .checkbox-list {

@@ -66,7 +66,7 @@
 
                             <md-input-container>
                                 <label>Number of Songs</label>
-                                <input ng-model="submissionForm.numTracks" type="number" min="0"  ng-disabled="submissionForm.overwriteExisting" required>
+                                <input ng-model="submissionForm.numTracks" type="number" min="0" required>
                             </md-input-container>
                         </div>
                         <div>
@@ -136,8 +136,8 @@
                                         </md-checkbox></td>
 
                                         <td width="50px"><a href="javascript:void(0)" class="playlist-info" ng-click="getPlaylistDetails(playlist.uri, $event)" aria-label="playlist info for {{name}}">
-                                            <i class="fa fa-info-circle"></i>
-                                        </a></td>
+                                            <i class="fa fa-info-circle">
+                                      </a></td>
                                     </tr></table>
                                 </li>
                             </ul>
