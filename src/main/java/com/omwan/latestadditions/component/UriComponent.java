@@ -15,7 +15,7 @@ public class UriComponent {
      * @param uri playlist URI string
      * @return PlaylistUri instance
      */
-    public PlaylistUri buildPlaylistURI(String uri) {
+    public PlaylistUri buildPlaylistUri(String uri) {
         String expectedFormat = "spotify:user:(?s)(.*):playlist:(?s)(.*)";
         if (!uri.matches(expectedFormat)) {
             throw new IllegalArgumentException("Malformed playlist uri");

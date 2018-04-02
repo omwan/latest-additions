@@ -31,7 +31,7 @@ public class UriComponentTest {
         String userId = "userId";
         String playlistId = "playlistId";
         String uri = String.format("spotify:user:%s:playlist:%s", userId, playlistId);
-        PlaylistUri uriWrapper = uriComponent.buildPlaylistURI(uri);
+        PlaylistUri uriWrapper = uriComponent.buildPlaylistUri(uri);
         assertEquals(userId, uriWrapper.getUserId());
         assertEquals(playlistId, uriWrapper.getPlaylistId());
     }
@@ -43,6 +43,6 @@ public class UriComponentTest {
     @Test(expected = IllegalArgumentException.class)
     public void testBuildPlaylistURIMalformedURI() {
         String uri = "";
-        uriComponent.buildPlaylistURI(uri);
+        uriComponent.buildPlaylistUri(uri);
     }
 }

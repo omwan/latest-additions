@@ -25,12 +25,8 @@ In the right panel, all of your playlists (including those that you follow) are 
 
 ## Bugs/Todos
 
-1. If a playlist previously created with the app is deleted from your Spotify account, it will still appear in the "Overwrite existing playlist" list due to limitations with the Java library.
-   1. Proposed workaround: submit a bug ticket to spotify-web-api-java repo
-2. Local tracks cannot be added to a playlist due to limitations in the Spotify API, and an 401 error is returned when that is attempted.
-   1. Proposed workaround: skip local tracks
-3. Duplicate tracks in selected playlists are not ignored at present.
-   1. Proposed workaround: skip duplicate tracks
+* If a playlist previously created with the app is deleted from your Spotify account, it will still appear in the "Overwrite existing playlist" list due to limitations with the Java library.
+  * Proposed workaround: submit a bug ticket to spotify-web-api-java repo
 
 **Other todos:**
 

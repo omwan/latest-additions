@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -78,7 +79,7 @@ public class PlaylistServiceImpl implements PlaylistService {
         String fields = String.join(",", Arrays.asList("description",
                 "external_urls", "href", "images", "name", "owner",
                 "tracks.total", "uri", "isCollaborative", "isPublicAccess"));
-        PlaylistUri playlistURIWrapper = uriComponent.buildPlaylistURI(playlistURI);
+        PlaylistUri playlistURIWrapper = uriComponent.buildPlaylistUri(playlistURI);
 
         SpotifyApi spotifyApi = spotifyApiComponent.getApiWithTokens();
 
@@ -129,19 +130,18 @@ public class PlaylistServiceImpl implements PlaylistService {
     @Override
     public PlaylistUri buildLatestAdditionsPlaylist(BuildPlaylistRequest request) {
         List<PlaylistUri> playlists = request.getPlaylistUris().keySet().stream()
-                .map(uriComponent::buildPlaylistURI)
+                .map(uriComponent::buildPlaylistUri)
                 .collect(Collectors.toList());
 
         Map<PlaylistUri, LinkedList<PlaylistTrack>> playlistTracks = getPlaylistTracks(request, playlists);
-
         List<PlaylistTrack> latestAdditionsTracks = getLatestAdditions(request, playlistTracks);
 
-        String userId = spotifyApiComponent.getCurrentUserId();
         String[] trackUris = latestAdditionsTracks.stream()
                 .map(playlistTrack -> playlistTrack.getTrack().getUri())
                 .collect(Collectors.toList())
                 .toArray(new String[latestAdditionsTracks.size()]);
 
+        String userId = spotifyApiComponent.getCurrentUserId();
         if (request.isOverwriteExisting()) {
             return overwriteExistingLatestAdditions(request.getPlaylistToOverwrite(), trackUris, userId);
         } else {
@@ -162,16 +162,22 @@ public class PlaylistServiceImpl implements PlaylistService {
 
         for (PlaylistUri playlist : playlists) {
             int limit = request.getNumTracks();
-            int playlistSize = request.getPlaylistUris().get(playlist.toString());
-            int offset = playlistSize - request.getNumTracks();
-            if (offset < 0) {
-                offset = 0;
-            }
+            int offset = getOffset(request, playlist);
+            playlist.setOffset(offset);
             PlaylistTrack[] tracks = getTracksForPlaylist(playlist, limit, offset);
             playlistTracks.put(playlist, new LinkedList<>(Arrays.asList(tracks)));
         }
 
         return playlistTracks;
+    }
+
+    private int getOffset(BuildPlaylistRequest request, PlaylistUri playlist) {
+        int playlistSize = request.getPlaylistUris().get(playlist.toString());
+        int offset = playlistSize - request.getNumTracks();
+        if (offset < 0) {
+            offset = 0;
+        }
+        return offset;
     }
 
     /**
@@ -190,7 +196,9 @@ public class PlaylistServiceImpl implements PlaylistService {
 
         Map<PlaylistUri, PlaylistTrack> lastAddedTracks = new HashMap<>();
         for (PlaylistUri playlist : playlistTracks.keySet()) {
-            lastAddedTracks.put(playlist, playlistTracks.get(playlist).removeLast());
+            playlist.setSkipCount(0);
+            lastAddedTracks.put(playlist, getNextTrack(playlist, playlistTracks,
+                    lastAddedTracks.values()));
         }
 
         int count = 0;
@@ -211,16 +219,74 @@ public class PlaylistServiceImpl implements PlaylistService {
             }
 
             latestAdditionsTracks.add(lastAdded);
-            if (!playlistTracks.get(lastAddedPlaylist).isEmpty()) {
-                lastAddedTracks.put(lastAddedPlaylist, playlistTracks.get(lastAddedPlaylist).removeLast());
-            } else {
-                lastAddedTracks.put(lastAddedPlaylist, null);
-            }
-            lastAdded = null;
             count++;
+
+            Collection<PlaylistTrack> comparedTracks = new ArrayList<>();
+            comparedTracks.addAll(latestAdditionsTracks);
+            comparedTracks.addAll(lastAddedTracks.values());
+
+            PlaylistTrack nextTrack = getNextTrack(lastAddedPlaylist, playlistTracks, comparedTracks);
+            lastAddedTracks.put(lastAddedPlaylist, nextTrack);
+            lastAdded = null;
         }
 
         return latestAdditionsTracks;
+    }
+
+    /**
+     * Retrieve the last added track for a given playlist, skipping local files
+     * and duplicate tracks.
+     *
+     * @param playlist         playlist to retrieve track for
+     * @param playlistTrackMap mapping of playlists to tracks
+     * @param comparedTracks   tracks to compare for duplicates
+     * @return next track for the given playlist
+     */
+    private PlaylistTrack getNextTrack(PlaylistUri playlist,
+                                       Map<PlaylistUri, LinkedList<PlaylistTrack>> playlistTrackMap,
+                                       Collection<PlaylistTrack> comparedTracks) {
+        LinkedList<PlaylistTrack> playlistTracks = playlistTrackMap.get(playlist);
+        if (!(playlistTracks.isEmpty())) {
+            PlaylistTrack nextTrack = playlistTracks.removeLast();
+            if (nextTrack.getIsLocal() || duplicateTrack(comparedTracks, nextTrack)) {
+                playlist.setSkipCount(playlist.getSkipCount() + 1);
+                return getNextTrack(playlist, playlistTrackMap, comparedTracks);
+            } else {
+                return nextTrack;
+            }
+        } else {
+            int skips = playlist.getSkipCount();
+            if (skips != 0) {
+                int offset = Math.max(playlist.getOffset() - skips, 0);
+                PlaylistTrack[] moreTracks = getTracksForPlaylist(playlist, skips,
+                        offset);
+                if (moreTracks.length == 0) {
+                    return null;
+                }
+                playlistTracks.addAll(Arrays.asList(moreTracks));
+                playlistTrackMap.put(playlist, playlistTracks);
+                playlist.setOffset(offset);
+                playlist.setSkipCount(0);
+                return getNextTrack(playlist, playlistTrackMap, comparedTracks);
+            }
+            return null;
+        }
+    }
+
+    /**
+     * Check if a track is in the given list of tracks.
+     *
+     * @param tracks        track to compare
+     * @param playlistTrack list of tracks to compare
+     * @return whether or not the track is present in the list
+     */
+    private boolean duplicateTrack(Collection<PlaylistTrack> tracks, PlaylistTrack playlistTrack) {
+        for (PlaylistTrack track : tracks) {
+            if (track.getTrack().getUri().equals(playlistTrack.getTrack().getUri())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -235,7 +301,7 @@ public class PlaylistServiceImpl implements PlaylistService {
                                                          String[] trackUris,
                                                          String userId) {
         SpotifyApi spotifyApi = spotifyApiComponent.getApiWithTokens();
-        PlaylistUri playlistUri = uriComponent.buildPlaylistURI(playlistToOverwrite);
+        PlaylistUri playlistUri = uriComponent.buildPlaylistUri(playlistToOverwrite);
         AbstractDataRequest replaceTracksRequest = spotifyApi
                 .replacePlaylistsTracks(userId, playlistUri.getPlaylistId(), trackUris)
                 .build();
@@ -270,7 +336,7 @@ public class PlaylistServiceImpl implements PlaylistService {
         Playlist latestAdditions = spotifyApiComponent.executeRequest(createPlaylistRequest,
                 createPlaylistErrorMessage);
 
-        PlaylistUri playlistUri = uriComponent.buildPlaylistURI(latestAdditions.getUri());
+        PlaylistUri playlistUri = uriComponent.buildPlaylistUri(latestAdditions.getUri());
         AbstractDataRequest addTracksRequest = spotifyApi
                 .addTracksToPlaylist(userId, playlistUri.getPlaylistId(), trackUris)
                 .build();

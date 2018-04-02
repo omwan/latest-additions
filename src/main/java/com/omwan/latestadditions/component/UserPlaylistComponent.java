@@ -29,7 +29,7 @@ public class UserPlaylistComponent {
      */
     public List<PlaylistUri> getPlaylistsForUser(String userId) {
         return userPlaylistRepository.findByUserId(userId).stream()
-                .map(userPlaylist -> uriComponent.buildPlaylistURI(userPlaylist.getPlaylistUri()))
+                .map(userPlaylist -> uriComponent.buildPlaylistUri(userPlaylist.getPlaylistUri()))
                 .collect(Collectors.toList());
     }
 
