@@ -27,7 +27,7 @@ public class SpotifyApiComponent {
     private String spotifyClientSecret;
 
     @Value("${spotify.redirect.uri}")
-    private String spotifyRedirectURI;
+    private String spotifyRedirectUri;
 
     @Autowired
     @SuppressWarnings("SpringJavaAutowiringInspection")
@@ -37,7 +37,7 @@ public class SpotifyApiComponent {
         return new SpotifyApi.Builder()
                 .setClientId(spotifyClient)
                 .setClientSecret(spotifyClientSecret)
-                .setRedirectUri(URI.create(spotifyRedirectURI))
+                .setRedirectUri(URI.create(spotifyRedirectUri))
                 .build();
     }
 
@@ -50,11 +50,15 @@ public class SpotifyApiComponent {
     public SpotifyApi getApiWithTokens() {
         SpotifyApi spotifyApi = getSpotifyApi();
 
-        String accessToken = session.getAttribute("ACCESS_TOKEN").toString();
-        String refreshToken = session.getAttribute("REFRESH_TOKEN").toString();
+        Object accessToken = session.getAttribute("ACCESS_TOKEN");
+        Object refreshToken = session.getAttribute("REFRESH_TOKEN");
 
-        spotifyApi.setAccessToken(accessToken);
-        spotifyApi.setRefreshToken(refreshToken);
+        if (accessToken == null || refreshToken == null) {
+            throw new RuntimeException("Access and refresh token not yet saved to session");
+        }
+
+        spotifyApi.setAccessToken(accessToken.toString());
+        spotifyApi.setRefreshToken(refreshToken.toString());
 
         return spotifyApi;
     }
@@ -65,16 +69,27 @@ public class SpotifyApiComponent {
      * @return user ID of current user
      */
     public String getCurrentUserId() {
-        if (session.getAttribute("USER_ID") == null) {
-            SpotifyApi spotifyApi = getApiWithTokens();
-            AbstractDataRequest userRequest = spotifyApi.getCurrentUsersProfile()
-                    .build();
-            User user = executeRequest(userRequest, "ugh");
-            session.setAttribute("USER_ID", user.getId());
-            return user.getId();
+        Object userIdAttribute = session.getAttribute("USER_ID");
+        if (userIdAttribute == null) {
+            String userId = getCurrentUserIdFromApi();
+            session.setAttribute("USER_ID", userId);
+            return userId;
         } else {
-            return session.getAttribute("USER_ID").toString();
+            return userIdAttribute.toString();
         }
+    }
+
+    /**
+     * Make Spotify API call to retrieve user ID of current user.
+     *
+     * @return current user ID
+     */
+    private String getCurrentUserIdFromApi() {
+        SpotifyApi spotifyApi = getApiWithTokens();
+        AbstractDataRequest userRequest = spotifyApi.getCurrentUsersProfile()
+                .build();
+        User user = executeRequest(userRequest, "ugh");
+        return user.getId();
     }
 
     /**
@@ -91,11 +106,7 @@ public class SpotifyApiComponent {
             return requestBuilder.execute();
         } catch (UnauthorizedException e) {
             refreshToken();
-            try {
-                return requestBuilder.execute();
-            } catch (IOException | SpotifyWebApiException ex) {
-                throw new RuntimeException(errorMessage, e);
-            }
+            throw new RuntimeException("Token refreshed, try making request again");
         } catch (IOException | SpotifyWebApiException e) {
             throw new RuntimeException(errorMessage, e);
         }

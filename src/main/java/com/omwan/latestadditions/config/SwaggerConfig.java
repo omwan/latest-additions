@@ -11,10 +11,18 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+/**
+ * Configurations for Swagger UI.
+ */
 @Configuration
 @EnableSwagger2
 public class SwaggerConfig {
 
+    /**
+     * Build API bean with path selectors.
+     *
+     * @return API object.
+     */
     @Bean
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)
@@ -25,6 +33,11 @@ public class SwaggerConfig {
                 .apiInfo(buildApiInfo());
     }
 
+    /**
+     * Build api info object containing project information.
+     *
+     * @return api info object
+     */
     private ApiInfo buildApiInfo() {
         return new ApiInfoBuilder()
                 .contact(new Contact("Olivia Wan", "https://github.com/omwan", "wan.o@husky.neu.edu"))

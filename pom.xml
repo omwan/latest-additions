@@ -9,7 +9,9 @@
     <packaging>jar</packaging>
 
     <name>latest-additions</name>
-    <description>Demo project for Spring Boot</description>
+    <description>
+        Generate a playlist of the latest additions to a set of user-defined playlists
+    </description>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -25,6 +27,16 @@
     </properties>
 
     <dependencies>
+
+        <!--mockit-->
+        <dependency>
+            <groupId>org.jmockit</groupId>
+            <artifactId>jmockit</artifactId>
+            <version>1.8</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!--spring boot dependencies-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-mongodb</artifactId>
@@ -33,25 +45,27 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
 
+        <!--spotify api-->
         <dependency>
             <groupId>se.michaelthelin.spotify</groupId>
             <artifactId>spotify-web-api-java</artifactId>
             <version>2.0.2</version>
         </dependency>
 
+        <!--apache commons-->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.7</version>
         </dependency>
 
+        <!--swagger-->
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger2</artifactId>
@@ -64,17 +78,11 @@
             <scope>compile</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.jmockit</groupId>
-            <artifactId>jmockit</artifactId>
-            <version>1.8</version>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
 
     <build>
         <plugins>
+            <!--spring boot maven + static hotswap config-->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
