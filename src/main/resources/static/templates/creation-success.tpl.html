@@ -1,0 +1,18 @@
+<!-- dialog for individual playlist details -->
+<md-dialog aria-label="Details for playlist {{playlist.name}}" class="creation-success-dialog">
+
+    <md-dialog-content layout-padding="">
+        <div class="md-title">Playlist successfully created</div>
+    </md-dialog-content>
+
+    <!-- close dialog button -->
+    <md-dialog-actions layout="row">
+        <md-button ng-click="hide()">
+            close
+        </md-button>
+        <md-button href="{{url}}" target="_blank" class="md-raised md-primary">
+            Open in Spotify
+        </md-button>
+    </md-dialog-actions>
+
+</md-dialog>

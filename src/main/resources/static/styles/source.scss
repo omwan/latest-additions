@@ -152,10 +152,6 @@ body {
 md-dialog.playlist-details-dialog {
 	width:500px;
 
-	md-dialog-actions {
-		border-top:1px solid #eee;
-	}
-
 	.playlist-details {
 		height:200px;
 
@@ -245,6 +241,10 @@ md-radio-button {
 	.md-label {
 		margin-left:25px;
 	}
+}
+
+md-dialog md-dialog-actions {
+	border-top:1px solid #eee;
 }
 
 // mobile styles

@@ -19,7 +19,7 @@ Java/Spring Boot and AngularJS web application to generate a "latest additions" 
 
 If not already authorized, click "Authorize" button to connect your Spotify account to the application.
 
-The left panel is where the specifications for the latest additions playlist belong, such as the name and description for the playlist. If you have previously created a playlist with the app, you can instead check the "Overwrite existing playlist" option to select a previously created playlist to overwrite.
+The left panel is where the specifications for the playlist to be created belong, such as the name and description for the playlist. If you have previously created a playlist with the app, you can instead check the "Overwrite existing playlist" option to select a previously created playlist to overwrite.
 
 In the right panel, all of your playlists (including those that you follow) are displayed; from there you can select the playlists to generate the "latest additions" playlist from. The radio buttons and filter allow you to limit and sort your playlists according to the specified query. The "information" icon beside each playlist can be clicked to open a dialog containing more information about the given playlist.
 
@@ -35,7 +35,7 @@ In the right panel, all of your playlists (including those that you follow) are 
 * save auth tokens to cookies instead of session history
 * load selected feeder playlists for existing playlist
 * cache loaded playlists instead of making API call on every refresh
-* provide link to newly created playlist upon successful form submission
+* travis ci configs
 
 ## Screencaps
 
