@@ -7,6 +7,24 @@ body {
   	flex-direction: column;
 }
 
+.spinner {
+    z-index:99999;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    height: 100%;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    
+    img {
+        height:200px;
+        width:200px;
+    }
+}
+
 .container {
 	position:relative;
 	margin:auto;

@@ -1,7 +1,9 @@
+<!-- dialog for individual playlist details -->
 <md-dialog aria-label="Details for playlist {{playlist.name}}" class="playlist-details-dialog">
 
     <md-dialog-content layout-padding="">
 
+        <!-- header w/ playlist image, title, and owner -->
         <table cellpadding=0 cellspacing=0 class="playlist-details" width=100%><tr>
             <td class="album-art">
                 <img src="{{playlist.images[0].url}}" ng-if="playlist.images.length > 0">
@@ -23,6 +25,7 @@
             </td>
         </tr></table>
 
+        <!-- playlist description and info -->
         <div class="playlist-description"><center>
             <p>
                 {{playlist.tracks.total}} tracks &middot;
@@ -43,6 +46,7 @@
 
     </md-dialog-content>
 
+    <!-- close dialog button -->
     <md-dialog-actions layout="row">
         <md-button ng-click="hide()">
             close

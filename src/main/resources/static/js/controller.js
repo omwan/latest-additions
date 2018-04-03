@@ -1,15 +1,16 @@
-app.controller('controller', ['$scope', '$http', '$mdDialog', 
-    function ($scope, $http, $mdDialog) {
+/**
+ * Main controller for application.
+ */
+app.controller('controller', ['$scope', '$http', '$mdDialog', 'rest', '$mdToast',
+    function ($scope, $http, $mdDialog, rest, $mdToast) {
 
     $scope.playlists = null;
     $scope.selectedPlaylists = [];
-
     $scope.playlistSort = "$index";
     $scope.playlistSortReverse = false;
-
     $scope.playlistFilter = "";
-
     $scope.playlistDetails = {};
+    $scope.existingPlaylists = [];
 
     $scope.submissionForm = {
         playlistName: "Latest Additions",
@@ -20,41 +21,50 @@ app.controller('controller', ['$scope', '$http', '$mdDialog',
         isCollaborative: false,
         playlistUris: {},
         playlistToOverwrite: null
-    }
+    };
 
-    $scope.existingPlaylists = [];
-
+    /**
+     * Get first page of playlists for the current user.
+     */
     var _getPlaylists = function () {
-        $http.get("/api/playlist/userplaylists")
-        // $http.get("../mock_responses/playlists.json")
-        .then(function (response) {
+        var successHandler = function (response) {
             if (response !== "") {
                 $scope.playlists = response.data;
             }
-        });
+        };
+        rest.getData("../mock_responses/playlists.json", null, successHandler, 
+            "Unable to retrieve user playlists");
     };
 
+    /**
+     * Get next page of playlists for the current user.
+     */
     $scope.loadMorePlaylists = function () {
         if ($scope.playlists) {
-            $http.get("/api/playlist/userplaylists", {
-                "params": {
-                    "offset": $scope.playlists.offset + $scope.playlists.limit,
-                    "limit": $scope.playlists.limit
-                }
-            })
-            .then(function (response) {
+            var successHandler = function (response) {
                 if (response.data !== null || response.data !== "") {
                     var origPlaylists = $scope.playlists.items;
                     $scope.playlists = response.data;
                     origPlaylists.push.apply(origPlaylists, $scope.playlists.items);
                     $scope.playlists.items = origPlaylists;
                 }
-            });
+            };
+            var params = {
+                "offset": $scope.playlists.offset + $scope.playlists.limit,
+                "limit": $scope.playlists.limit
+            };
+            rest.getData("/api/playlist/userplaylists", params, successHandler, 
+                "Unable to retrieve next page of user playlists");
         } else {
             return null;
         }
     };
 
+    /**
+     * Open the playlist details dialog for the given playlist URI.
+     * @param uri   playlist uri
+     * @param event click event for modal
+     */
     $scope.getPlaylistDetails = function (uri, event) {
         $mdDialog.show({
             locals: {
@@ -65,32 +75,41 @@ app.controller('controller', ['$scope', '$http', '$mdDialog',
             templateUrl: '../templates/playlist-details.tpl.html',
             parent: angular.element(document.body),
             targetEvent: event,
-            clickOutsideToClose:true
+            clickOutsideToClose: true
         });
     };
 
+    /**
+     * Controller for playlist details dialog.
+     * @param $scope            parent scope
+     * @param $mdDialog         dialog module
+     * @param playlistDetails   playlist details mapping for caching
+     * @param uri               playlist URI to display details for
+     */
     function DialogController($scope, $mdDialog, playlistDetails, uri) {
-        $scope.hide = function() {
+        $scope.hide = function () {
             $mdDialog.hide();
         };
 
         if (uri in playlistDetails) {
             $scope.playlist = playlistDetails[uri];
         } else {
-            $http.get("/api/playlist/details", {
-                "params": {
-                    "uri": uri
-                }
-            })
-            .then(function (response) {
+            var successHandler = function (response) {
                 if (response.data !== null || response.data !== "") {
                     playlistDetails[uri] = response.data;
                     $scope.playlist = response.data;
                 }
-            });
+            };
+            rest.getData("/api/playlist/details", {"uri": uri}, successHandler, 
+                "Unable to retrieve details for playlist");
         }
     }
 
+    /**
+     * Toggle selection of checkbox list.
+     * @param item currently selected item
+     * @param list list of previously selected items
+     */
     $scope.toggle = function (item, list) {
         var idx = list.indexOf(item);
         if (idx > -1) {
@@ -101,38 +120,66 @@ app.controller('controller', ['$scope', '$http', '$mdDialog',
         }
     };
 
+    /**
+     * Check if the given item exists in the list.
+     * @param item          item to check
+     * @param list          containing list
+     * @returns {boolean}   whether or not the item exists
+     */
     $scope.exists = function (item, list) {
         return list.indexOf(item) > -1;
     };
 
-    $scope.submitForm = function() {
-        $scope.selectedPlaylists.forEach(function(playlist) {
+    /**
+     * Submit the form in its current state to the build endpoint.
+     */
+    $scope.submitForm = function () {
+        $scope.selectedPlaylists.forEach(function (playlist) {
             $scope.submissionForm.playlistUris[playlist.uri] = playlist.tracks.total;
         });
-        if ($scope.submissionForm.description === "" 
-            || $scope.submissionForm.description === null) {
+
+        var description = $scope.submissionForm;
+        if (description === "" || description === null) {
             var playlistNames = $scope.selectedPlaylists
-                .map(x => x.name)
+                .map(function (playlist) { return playlist.name; })
                 .join(", ");
-            $scope.submissionForm.description = "Autogenerated playlist containing " 
+            $scope.submissionForm.description = "Autogenerated playlist containing "
                 + "last added tracks from the following playlists: "
                 + playlistNames
                 + ". See source code at: https://github.com/omwan/latest-addition"
         }
-        $http.post("/api/playlist/build", $scope.submissionForm);
-        // console.log($scope.submissionForm.description);
+
+        var successHandler = function () {
+            $mdToast.show($mdToast.simple()
+                .textContent("Playlist successfully created")
+                .position("bottom left")
+                .hideDelay(3000));
+        };
+
+        rest.postData("/api/playlist/build", null, $scope.submissionForm, successHandler,
+            "Unable to create playlist with given parameters");
+
         $scope.submissionForm.description = null;
     };
 
-    var _getExistingPlaylists = function() {
-        $http.get("/api/playlist/existing")
-        // $http.get("../mock_responses/existing_playlists.json")
-        .then(function(response) {
+    /**
+     * Get the existing saved playlists for the current user.
+     */
+    var _getExistingPlaylists = function () {
+        var successHandler = function (response) {
             $scope.existingPlaylists = response.data;
-        });
+            if ($scope.existingPlaylists.length > 0) {
+                $scope.submissionForm.playlistToOverwrite = $scope.existingPlaylists[0].uri;
+            }
+        };
+        rest.getData("../mock_responses/existing_playlists.json", null, successHandler,
+            "Unable to retrieve existing playlists for current user");
     };
 
-    var _init = function() {
+    /**
+     * Initialize the application scope.
+     */
+    var _init = function () {
         if ($scope.playlists === null || $scope.playlists === "") {
             _getPlaylists();
             _getExistingPlaylists();

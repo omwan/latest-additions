@@ -1,5 +1,5 @@
 # latest-addition
-Java/Spring Boot and AngularJS web application to generate a "latest additions" playlist from a selected set of Spotify playlists. Built with [spotify-web-api-java](https://github.com/thelinmichael/spotify-web-api-java) library.
+Java/Spring Boot and AngularJS web application to generate a "latest additions" playlist of the most recently added tracks from a user-selected set of Spotify playlists. Built with [spotify-web-api-java](https://github.com/thelinmichael/spotify-web-api-java) library.
 
 **Links:**
 
@@ -25,15 +25,17 @@ In the right panel, all of your playlists (including those that you follow) are 
 
 ## Bugs/Todos
 
-* If a playlist previously created with the app is deleted from your Spotify account, it will still appear in the "Overwrite existing playlist" list due to limitations with the Java library.
-  * Proposed workaround: submit a bug ticket to spotify-web-api-java repo
+| issue                                    | proposed workaround                      |
+| ---------------------------------------- | ---------------------------------------- |
+| If a playlist previously created with the app is deleted from your Spotify account, it will still appear in the "Overwrite existing playlist" list due to limitations with the Java library. | submit a bug ticket to spotify-web-api-java repo |
+| Algorithm assumes last tracks in playlist's default order are the most recently added, so if the user manually changes the playlist track order, newest tracks may not be picked up. | tbd                                      |
 
 **Other todos:**
 
-* toasts on success/failure
-* loader icon while HTTP requests are being made
 * save auth tokens to cookies instead of session history
 * load selected feeder playlists for existing playlist
+* cache loaded playlists instead of making API call on every refresh
+* provide link to newly created playlist upon successful form submission
 
 ## Screencaps
 
