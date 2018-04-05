@@ -18,9 +18,6 @@ public class UserPlaylistComponent {
     @Autowired
     private UserPlaylistRepository userPlaylistRepository;
 
-    @Autowired
-    private UriComponent uriComponent;
-
     /**
      * Retrieve URIs of all saved playlists for a given user.
      *
@@ -29,7 +26,7 @@ public class UserPlaylistComponent {
      */
     public List<PlaylistUri> getPlaylistsForUser(String userId) {
         return userPlaylistRepository.findByUserId(userId).stream()
-                .map(userPlaylist -> uriComponent.buildPlaylistUri(userPlaylist.getPlaylistUri()))
+                .map(userPlaylist -> UriUtils.buildPlaylistUri(userPlaylist.getPlaylistUri()))
                 .collect(Collectors.toList());
     }
 
@@ -39,10 +36,10 @@ public class UserPlaylistComponent {
      * @param userId      user ID to save playlist for
      * @param playlistUri playlist to save
      */
-    public void saveUserPlaylist(String userId, String playlistUri) {
+    public UserPlaylist saveUserPlaylist(String userId, String playlistUri) {
         UserPlaylist userPlaylist = new UserPlaylist();
         userPlaylist.setUserId(userId);
         userPlaylist.setPlaylistUri(playlistUri);
-        userPlaylistRepository.save(userPlaylist);
+        return userPlaylistRepository.save(userPlaylist);
     }
 }

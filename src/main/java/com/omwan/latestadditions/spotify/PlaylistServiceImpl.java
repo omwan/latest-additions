@@ -1,10 +1,11 @@
 package com.omwan.latestadditions.spotify;
 
 import com.omwan.latestadditions.component.SpotifyApiComponent;
-import com.omwan.latestadditions.component.UriComponent;
+import com.omwan.latestadditions.component.UriUtils;
 import com.omwan.latestadditions.component.UserPlaylistComponent;
 import com.omwan.latestadditions.dto.BuildPlaylistRequest;
 import com.omwan.latestadditions.dto.PlaylistUri;
+import com.sun.jndi.toolkit.url.Uri;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.model_objects.specification.Paging;
 import com.wrapper.spotify.model_objects.specification.Playlist;
@@ -33,9 +34,6 @@ public class PlaylistServiceImpl implements PlaylistService {
 
     @Autowired
     private SpotifyApiComponent spotifyApiComponent;
-
-    @Autowired
-    private UriComponent uriComponent;
 
     @Autowired
     private UserPlaylistComponent userPlaylistComponent;
@@ -79,7 +77,7 @@ public class PlaylistServiceImpl implements PlaylistService {
         String fields = String.join(",", Arrays.asList("description",
                 "external_urls", "href", "images", "name", "owner",
                 "tracks.total", "uri", "isCollaborative", "isPublicAccess"));
-        PlaylistUri playlistURIWrapper = uriComponent.buildPlaylistUri(playlistURI);
+        PlaylistUri playlistURIWrapper = UriUtils.buildPlaylistUri(playlistURI);
 
         SpotifyApi spotifyApi = spotifyApiComponent.getApiWithTokens();
 
@@ -130,7 +128,7 @@ public class PlaylistServiceImpl implements PlaylistService {
     @Override
     public PlaylistUri buildLatestAdditionsPlaylist(BuildPlaylistRequest request) {
         List<PlaylistUri> playlists = request.getPlaylistUris().keySet().stream()
-                .map(uriComponent::buildPlaylistUri)
+                .map(UriUtils::buildPlaylistUri)
                 .collect(Collectors.toList());
 
         Map<PlaylistUri, LinkedList<PlaylistTrack>> playlistTracks = getPlaylistTracks(request, playlists);
@@ -301,7 +299,7 @@ public class PlaylistServiceImpl implements PlaylistService {
                                                          String[] trackUris,
                                                          String userId) {
         SpotifyApi spotifyApi = spotifyApiComponent.getApiWithTokens();
-        PlaylistUri playlistUri = uriComponent.buildPlaylistUri(playlistToOverwrite);
+        PlaylistUri playlistUri = UriUtils.buildPlaylistUri(playlistToOverwrite);
         AbstractDataRequest replaceTracksRequest = spotifyApi
                 .replacePlaylistsTracks(userId, playlistUri.getPlaylistId(), trackUris)
                 .build();
@@ -336,7 +334,7 @@ public class PlaylistServiceImpl implements PlaylistService {
         Playlist latestAdditions = spotifyApiComponent.executeRequest(createPlaylistRequest,
                 createPlaylistErrorMessage);
 
-        PlaylistUri playlistUri = uriComponent.buildPlaylistUri(latestAdditions.getUri());
+        PlaylistUri playlistUri = UriUtils.buildPlaylistUri(latestAdditions.getUri());
         AbstractDataRequest addTracksRequest = spotifyApi
                 .addTracksToPlaylist(userId, playlistUri.getPlaylistId(), trackUris)
                 .build();

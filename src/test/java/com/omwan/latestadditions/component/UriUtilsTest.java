@@ -1,26 +1,15 @@
-package com.omwan.latestadditions.utils;
+package com.omwan.latestadditions.component;
 
 
-import com.omwan.latestadditions.component.UriComponent;
 import com.omwan.latestadditions.dto.PlaylistUri;
-import mockit.Tested;
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
 /**
- * Unit tests for UriComponent.
+ * Unit tests for UriUtils.
  */
-public class UriComponentTest {
-
-    @Tested
-    private UriComponent uriComponent;
-
-    @Before
-    public void setup() {
-        this.uriComponent = new UriComponent();
-    }
+public class UriUtilsTest {
 
     /**
      * Assert that a PlaylistUri instance can be built from a URI string
@@ -31,7 +20,7 @@ public class UriComponentTest {
         String userId = "userId";
         String playlistId = "playlistId";
         String uri = String.format("spotify:user:%s:playlist:%s", userId, playlistId);
-        PlaylistUri uriWrapper = uriComponent.buildPlaylistUri(uri);
+        PlaylistUri uriWrapper = UriUtils.buildPlaylistUri(uri);
         assertEquals(userId, uriWrapper.getUserId());
         assertEquals(playlistId, uriWrapper.getPlaylistId());
     }
@@ -43,6 +32,6 @@ public class UriComponentTest {
     @Test(expected = IllegalArgumentException.class)
     public void testBuildPlaylistURIMalformedURI() {
         String uri = "";
-        uriComponent.buildPlaylistUri(uri);
+        UriUtils.buildPlaylistUri(uri);
     }
 }

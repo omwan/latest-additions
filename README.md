@@ -29,7 +29,7 @@ In the right panel, all of your playlists (including those that you follow) are 
 | issue                                    | proposed workaround                      |
 | ---------------------------------------- | ---------------------------------------- |
 | If a playlist previously created with the app is deleted from your Spotify account, it will still appear in the "Overwrite existing playlist" list due to limitations with the Java library. | submit a bug ticket to spotify-web-api-java repo |
-| Algorithm assumes last tracks in playlist's default order are the most recently added, so if the user manually changes the playlist track order, newest tracks may not be picked up. | tbd                                      |
+| Algorithm assumes last tracks in playlist's default order are the most recently added, so if the user manually changes the playlist track order, newest tracks may not be picked up. | ¯\\\_(ツ)_/¯                              |
 
 **Other todos:**
 
