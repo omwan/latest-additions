@@ -168,6 +168,7 @@ app.controller('controller', ['$scope', '$http', '$mdDialog', 'rest', '$mdToast'
             "Unable to create playlist with given parameters");
 
         $scope.submissionForm.description = null;
+        $scope.apply();
     };
 
     /**
