@@ -150,8 +150,7 @@
                                     <table cellpadding="0" cellspacing="0" width="100%"><tr>
                                         <td><md-checkbox ng-checked="exists(playlist, selectedPlaylists)" ng-click="toggle(playlist, selectedPlaylists)" aria-label="playlist.name">
 
-                                            {{playlist.name}} |&nbsp;
-
+                                            {{playlist.name}} | 
                                             <span ng-if="playlist.owner.displayName !== null">
                                                 {{playlist.owner.displayName}}
                                             </span>
@@ -162,6 +161,7 @@
                                         </md-checkbox></td>
 
                                         <td width="50px"><a href="javascript:void(0)" class="playlist-info" ng-click="getPlaylistDetails(playlist.uri, $event)" aria-label="playlist info for {{name}}">
+                                            <md-tooltip md-direction="right">Playlist Info</md-tooltip>
                                             <i class="fa fa-info-circle">
                                       </a></td>
                                     </tr></table>
