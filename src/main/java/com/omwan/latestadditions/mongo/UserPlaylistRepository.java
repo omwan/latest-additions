@@ -18,4 +18,12 @@ public interface UserPlaylistRepository extends MongoRepository<UserPlaylist, St
      * @return list of documents
      */
     List<UserPlaylist> findByUserId(String userId);
+
+    /**
+     * Delete a docuemnt with the given playlist uri.
+     *
+     * @param playlistUri uri of playlist to delete
+     * @return number of deleted documents
+     */
+    int deleteByPlaylistUri(String playlistUri);
 }

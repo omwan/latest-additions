@@ -40,6 +40,11 @@ public class PlaylistController {
         return playlistService.getExistingPlaylists();
     }
 
+    @RequestMapping(method = RequestMethod.DELETE, value = "/existing")
+    public void deleteSavedPlaylist(String playlistUri) {
+        playlistService.deleteSavedPlaylist(playlistUri);
+    }
+
     @RequestMapping(method = RequestMethod.POST, value = "/build")
     public PlaylistUri buildLatestAdditionsPlaylist(@RequestBody BuildPlaylistRequest request) {
         return playlistService.buildLatestAdditionsPlaylist(request);

@@ -42,4 +42,17 @@ public class UserPlaylistComponent {
         userPlaylist.setPlaylistUri(playlistUri);
         return userPlaylistRepository.save(userPlaylist);
     }
+
+    /**
+     * Delete the playlist with the given URI. If no playlists are found matching
+     * the given URI, an exception is thrown.
+     *
+     * @param playlistUri URI of playlist to delete.
+     */
+    public void deleteSavedPlaylist(String playlistUri) {
+        int deletedCount = userPlaylistRepository.deleteByPlaylistUri(playlistUri);
+        if (deletedCount != 1) {
+            throw new IllegalArgumentException("No saved playlists found with URI " + playlistUri);
+        }
+    }
 }

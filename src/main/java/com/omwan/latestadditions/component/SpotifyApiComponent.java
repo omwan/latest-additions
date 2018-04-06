@@ -64,6 +64,17 @@ public class SpotifyApiComponent {
     }
 
     /**
+     * Helper to check if access and refresh tokens have already been set as
+     * session attributes.
+     *
+     * @return whether or not access/refresh tokens exist as session attributes.
+     */
+    public boolean tokensExist() {
+        return session.getAttribute("ACCESS_TOKEN") != null
+                && session.getAttribute("REFRESH_TOKEN") != null;
+    }
+
+    /**
      * Retrieve user ID of current user, and save as a session attribute.
      *
      * @return user ID of current user

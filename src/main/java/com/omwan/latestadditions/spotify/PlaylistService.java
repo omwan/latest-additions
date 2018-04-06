@@ -20,4 +20,6 @@ public interface PlaylistService {
     List<Playlist> getExistingPlaylists();
 
     PlaylistUri buildLatestAdditionsPlaylist(BuildPlaylistRequest request);
+
+    void deleteSavedPlaylist(String playlistUri);
 }

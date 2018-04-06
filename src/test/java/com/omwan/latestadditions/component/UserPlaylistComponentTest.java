@@ -54,6 +54,38 @@ public class UserPlaylistComponentTest {
     }
 
     /**
+     * Assert that the appropriate repository method is called with the
+     * given playlist URI string.
+     */
+    @Test
+    public void testDeleteSavedPlaylist() {
+        final String playlistUri = "spotify:user:123:playlist:456";
+
+        new Expectations() {{
+            userPlaylistRepository.deleteByPlaylistUri(playlistUri);
+            returns(1);
+        }};
+
+        userPlaylistComponent.deleteSavedPlaylist(playlistUri);
+    }
+
+    /**
+     * Assert that if no playlists matching the given playlistUri are deleted,
+     * the appropriate exception is thrown.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testDeleteSavedPlaylistInvalidUri() {
+        final String playlistUri = "spotify:user:123:playlist:456";
+
+        new Expectations() {{
+            userPlaylistRepository.deleteByPlaylistUri(playlistUri);
+            returns(0);
+        }};
+
+        userPlaylistComponent.deleteSavedPlaylist(playlistUri);
+    }
+
+    /**
      * Create a mocked UserPlaylist document instance with the given parameters.
      *
      * @param userId      user ID to mock

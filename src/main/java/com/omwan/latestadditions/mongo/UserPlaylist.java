@@ -14,6 +14,11 @@ public class UserPlaylist {
     public UserPlaylist() {
     }
 
+    public UserPlaylist(String userId, String playlistUri) {
+        this.userId = userId;
+        this.playlistUri = playlistUri;
+    }
+
     public String getUserId() {
         return userId;
     }
