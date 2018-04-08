@@ -348,21 +348,21 @@ public class PlaylistServiceImpl implements PlaylistService {
     /**
      * Retrieve the tracks for an individual playlist.
      *
-     * @param uriWrapper URI of playlist to retrieve tracks for
-     * @param limit      maximum number of tracks to retrieve
-     * @param offset     offset to start retrieving tracks from
+     * @param uri    URI of playlist to retrieve tracks for
+     * @param limit  maximum number of tracks to retrieve
+     * @param offset offset to start retrieving tracks from
      * @return array of playlist tracks
      */
-    private PlaylistTrack[] getTracksForPlaylist(PlaylistUri uriWrapper, int limit, int offset) {
+    private PlaylistTrack[] getTracksForPlaylist(PlaylistUri uri, int limit, int offset) {
         SpotifyApi spotifyApi = spotifyApiComponent.getApiWithTokens();
 
         AbstractDataRequest trackRequest = spotifyApi
-                .getPlaylistsTracks(uriWrapper.getUserId(), uriWrapper.getPlaylistId())
+                .getPlaylistsTracks(uri.getUserId(), uri.getPlaylistId())
                 .limit(limit)
                 .offset(offset)
                 .build();
 
-        String errorMessage = "Unable to retrieve tracks for playlist " + uriWrapper.toString();
+        String errorMessage = "Unable to retrieve tracks for playlist " + uri.toString();
         Paging<PlaylistTrack> tracks = spotifyApiComponent.executeRequest(trackRequest, errorMessage);
         return tracks.getItems();
     }

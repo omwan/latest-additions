@@ -36,7 +36,6 @@ In the right panel, all of your playlists (including those that you follow) are 
 * save auth tokens to cookies instead of session history
 * load selected feeder playlists for existing playlist
 * cache loaded playlists instead of making API call on every refresh
-* use fontawesome spinner for loading icon
 
 ## Screencaps
 

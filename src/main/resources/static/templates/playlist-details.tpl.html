@@ -32,7 +32,7 @@
                 <span ng-if="playlist.isPublicAccess">Public</span>
                 <span ng-if="!playlist.isPublicAccess">Private</span> &middot; 
                 <span ng-if="playlist.isCollaborative">Collaborative &middot; </span>
-                <a href="{{playlist.externalUrls.externalUrls.spotify}}" target="_blank">Open in Spotify</a>
+                <a href="{{playlist.externalUrls.externalUrls.spotify}}" target="spotify">Open in Spotify</a>
             </p>
 
             <p ng-bind-html="playlist.description" ng-if="playlist.description !== null"></p>
