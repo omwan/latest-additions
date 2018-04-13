@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
 
+    <!-- metadata -->
     <title>Latest Additions</title>
-
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/ico" href="assets/octopus_favicon.png" />
 
@@ -13,7 +13,6 @@
 
     <!-- Angular Material style sheet -->
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.8/angular-material.min.css" />
-
 
     <!-- Angular Material requires Angular.js Libraries -->
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
@@ -25,181 +24,202 @@
     <!-- Angular Material Library -->
     <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.8/angular-material.min.js"></script>
 
+    <!-- app.js script -->
     <script src="js/app.js"></script>
+
+    <!-- styles -->
     <link rel="stylesheet" href="styles/source.css" />
 
 </head>
 <body ng-app="app" ng-controller="controller">
 
-    <!-- loading spinner -->
-    <div class="spinner" ng-if="isLoading">
-        <i class="fa fa-pulse fa-spinner"></i>
+<!-- loading spinner -->
+<div class="spinner" ng-if="isLoading">
+    <i class="fa fa-pulse fa-spinner"></i>
+</div>
+
+<div class="container">
+
+<!-- auth button -->
+<center>
+    <md-button class="md-raised md-primary auth" ng-if="playlists === null || playlists === ''" href="/api/auth/init">
+        <i class="fa fa-spotify"></i> authorize
+    </md-button>
+</center>
+
+<!-- input form -->
+<div class="input-form" ng-if="playlists !== null && playlists !== ''">
+
+<!-- header -->
+<div class="input-header">
+    <h1>Latest Additions</h1>
+</div>
+
+<!-- form contents -->
+<md-content class="form-content">
+<form>
+    
+<!-- new playlist information -->
+<div class="new-playlist-details">
+
+<h2>Playlist Details</h2>
+<div class="overwrite-check">
+    <md-checkbox ng-model="submissionForm.overwriteExisting">Overwrite existing playlist?</md-checkbox>
+</div>
+
+<!-- new playlist form -->
+<div ng-if="!submissionForm.overwriteExisting">
+    <div style="height:75px;overflow:hidden;">
+        <md-input-container>
+            <label>Playlist Name</label>
+            <input ng-model="submissionForm.playlistName" ng-disabled="submissionForm.overwriteExisting" required>
+        </md-input-container>
+
+        <md-input-container>
+            <label>Number of Songs</label>
+            <input ng-model="submissionForm.numTracks" type="number" min="0" required>
+        </md-input-container>
+    </div>
+    <div class="new-playlist-checkboxes">
+        <ul class="checkbox-list">
+            <li>
+                <md-checkbox ng-model="submissionForm.isPublic" ng-disabled="submissionForm.overwriteExisting">public</md-checkbox>
+            </li>
+            <li>
+                <md-checkbox ng-model="submissionForm.isCollaborative" ng-disabled="submissionForm.overwriteExisting">collaborative</md-checkbox>
+            </li>
+        </ul>
+    </div>
+    <div>
+        <md-input-container style="width:100%;margin-top:40px;">
+            <label>Playlist Description</label>
+            <textarea name="description" type="text" ng-model="submissionForm.description" ng-disabled="submissionForm.overwriteExisting" max-rows="2"></textarea>
+        </md-input-container>
+    </div>
+</div><!--new playlist-->
+
+<!-- existing playlist selection -->
+<div ng-if="submissionForm.overwriteExisting && existingPlaylists.length > 0" style="width:100%">
+    <div>
+        <md-radio-group ng-model="submissionForm.playlistToOverwrite">
+            <md-radio-button ng-value="playlist.uri" ng-model="submissionForm.playlistToOverwrite" ng-repeat="playlist in existingPlaylists">
+                {{playlist.name}} | {{playlist.tracks.total}} tracks
+            </md-radio-button>
+        </md-radio-group>
     </div>
 
-    <div class="container">
+    <div style="margin-top:20px;">
+        <md-input-container>
+            <label>Number of Songs</label>
+            <input ng-model="submissionForm.numTracks" type="number" min="0" required>
+        </md-input-container>
+    </div>
+</div>
+<div ng-if="submissionForm.overwriteExisting && existingPlaylists.length == 0">
+    No existing playlists for the current user. You must have created at least one playlist with this app to use this feature.
+</div><!--existing playlist-->
 
-        <!-- auth button -->
-        <center>
-            <md-button class="md-raised md-primary auth" ng-if="playlists === null || playlists === ''" href="/api/auth/init">
-                <i class="fa fa-spotify"></i> authorize
-            </md-button>
-        </center>
-
-        <!-- input form -->
-        <div class="input-form" ng-if="playlists !== null && playlists !== ''">
-
-            <!-- header -->
-            <div class="input-header">
-                <h1>Latest Additions</h1>
-            </div>
-
-            <!-- form contents -->
-            <md-content class="form-content">
-                <form>
-                    <!-- new playlist information -->
-                    <div class="new-playlist-details">
-                        <h2>Playlist Details</h2>
-                        <div class="overwrite-check">
-                            <md-checkbox ng-model="submissionForm.overwriteExisting">Overwrite existing playlist?</md-checkbox>
-                        </div>
-
-                        <div ng-if="!submissionForm.overwriteExisting">
-                            <div style="height:75px;overflow:hidden;">
-                                <md-input-container>
-                                    <label>Playlist Name</label>
-                                    <input ng-model="submissionForm.playlistName" ng-disabled="submissionForm.overwriteExisting" required>
-                                </md-input-container>
-
-                                <md-input-container>
-                                    <label>Number of Songs</label>
-                                    <input ng-model="submissionForm.numTracks" type="number" min="0" required>
-                                </md-input-container>
-                            </div>
-                            <div class="new-playlist-checkboxes">
-                                <ul class="checkbox-list">
-                                    <li>
-                                        <md-checkbox ng-model="submissionForm.isPublic" ng-disabled="submissionForm.overwriteExisting">public</md-checkbox>
-                                    </li>
-                                    <li>
-                                        <md-checkbox ng-model="submissionForm.isCollaborative" ng-disabled="submissionForm.overwriteExisting">collaborative</md-checkbox>
-                                    </li>
-                                </ul>
-                            </div>
-                            <div>
-                                <md-input-container style="width:100%;margin-top:40px;">
-                                    <label>Playlist Description</label>
-                                    <textarea name="description" type="text" ng-model="submissionForm.description" ng-disabled="submissionForm.overwriteExisting" max-rows="2"></textarea>
-                                </md-input-container>
-                            </div>
-                        </div>
-
-                        <div ng-if="submissionForm.overwriteExisting && existingPlaylists.length > 0" style="width:100%">
-                            <div>
-                                <md-radio-group ng-model="submissionForm.playlistToOverwrite">
-                                    <md-radio-button ng-value="playlist.uri" ng-model="submissionForm.playlistToOverwrite" ng-repeat="playlist in existingPlaylists">
-                                        {{playlist.name}} | {{playlist.tracks.total}} tracks
-                                    </md-radio-button>
-                                </md-radio-group>
-                            </div>
-
-                            <div style="margin-top:20px;">
-                                <md-input-container>
-                                    <label>Number of Songs</label>
-                                    <input ng-model="submissionForm.numTracks" type="number" min="0" required>
-                                </md-input-container>
-                            </div>
-                        </div>
-                        <div ng-if="submissionForm.overwriteExisting && existingPlaylists.length == 0">
-                            No existing playlists for the current user. You must have created at least one playlist with this app to use this feature.
-                        </div>
-                    </div><!--new-playlist-details-->
+</div><!--new-playlist-details-->
 
 
-                    <!-- playlist selection -->
-                    <div class="playlist-select">
-                        <h2>Select Feeder Playlists</h2>
+<!-- playlist selection -->
+<div class="playlist-select">
 
-                        <!-- playlist sort -->
-                        <div class="playlist-sort">
-                            <p>
-                                <label>Sort Playlists</label>
-                            </p>
-                            <md-radio-group ng-model="playlistSort">
-                                <md-radio-button value="$index">
-                                    default
-                                </md-radio-button>
-                                <md-radio-button value="name">
-                                    alphabetical
-                                </md-radio-button>
-                                <md-radio-button value="owner.displayName">
-                                    owner
-                                </md-radio-button>
-                            </md-radio-group>
-                            <md-checkbox ng-model="playlistSortReverse">reverse</md-checkbox>
-                        </div><!--playlist-sort-->
+<h2>Select Feeder Playlists</h2>
 
-                        <!-- playlist filter -->
-                        <md-input-container class="playlist-filter">
-                            <label>Filter playlists</label>
-                            <input ng-model="playlistFilter">
-                        </md-input-container>
+<!-- playlist sort -->
+<div class="playlist-sort">
+    <p>
+        <label>Sort Playlists</label>
+    </p>
 
-                        <!-- list of playlists -->
-                        <div class="playlist-list">
-                            <ul class="checkbox-list">
-                                <li ng-repeat="playlist in playlists.items | orderBy:playlistSort:playlistSortReverse | filter:{name:playlistFilter}">
-                                    <table cellpadding="0" cellspacing="0" width="100%"><tr>
-                                        <td><md-checkbox ng-checked="exists(playlist, selectedPlaylists)" ng-click="toggle(playlist, selectedPlaylists)" aria-label="playlist.name">
+    <md-radio-group ng-model="playlistSort">
+        <md-radio-button value="$index">
+            default
+        </md-radio-button>
+        <md-radio-button value="name">
+            alphabetical
+        </md-radio-button>
+        <md-radio-button value="owner.displayName">
+            owner
+        </md-radio-button>
+    </md-radio-group>
 
-                                            {{playlist.name}} | 
-                                            <span ng-if="playlist.owner.displayName !== null">
-                                                {{playlist.owner.displayName}}
-                                            </span>
+    <md-checkbox ng-model="playlistSortReverse">
+        reverse
+    </md-checkbox>
+</div><!--playlist-sort-->
 
-                                            <span ng-if="playlist.owner.displayName === null">
-                                                {{playlist.owner.id}}
-                                            </span>
-                                        </md-checkbox></td>
+<!-- playlist filter -->
+<md-input-container class="playlist-filter">
+    <label>Filter playlists</label>
+    <input ng-model="playlistFilter">
+</md-input-container>
 
-                                        <td width="50px"><a href="javascript:void(0)" class="playlist-info" ng-click="getPlaylistDetails(playlist.uri, $event)" aria-label="playlist info for {{name}}">
-                                            <md-tooltip md-direction="right">Playlist Info</md-tooltip>
-                                            <i class="fa fa-info-circle">
-                                      </a></td>
-                                    </tr></table>
-                                </li>
-                            </ul>
-                            <div class="load-more" ng-if="playlists.next !== null">
-                                <a href="javascript:void(0)" ng-click="loadMorePlaylists()">load more</a>
-                            </div>
-                        </div><!--playlist-list-->
-                    </div><!--playlist-select-->
-                </form>
-            </md-content>
+<!-- list of playlists -->
+<div class="playlist-list">
 
-            <!-- submission button -->
-            <div class="submission">
-                <md-button class="md-raised md-primary" ng-click="submitForm($event)" ng-disabled="selectedPlaylists.length == 0">
-                    Create playlist
-                </md-button>
-            </div>
+    <ul class="checkbox-list">
+        <li ng-repeat="playlist in playlists.items | orderBy:playlistSort:playlistSortReverse | filter:{name:playlistFilter}">
+            <table cellpadding="0" cellspacing="0" width="100%"><tr>
+                <td><md-checkbox ng-checked="exists(playlist, selectedPlaylists)" ng-click="toggle(playlist, selectedPlaylists)" aria-label="playlist.name">
 
-        </div><!--input form-->
+                    {{playlist.name}} | 
+                    <span ng-if="playlist.owner.displayName !== null">
+                        {{playlist.owner.displayName}}
+                    </span>
 
-    </div><!--container-->
+                    <span ng-if="playlist.owner.displayName === null">
+                        {{playlist.owner.id}}
+                    </span>
 
-    <div class="footer">
-        <p>
-            © Olivia Wan 2018, all rights reserved &middot;
-            <a href="https://github.com/omwan/latest-addition" target="_blank">Github</a> &middot; 
-            <a href="/swagger-ui.html" target="_blank">Swagger</a>
-        </p>
+                </md-checkbox></td>
+
+                <td width="50px"><a href="javascript:void(0)" class="playlist-info" ng-click="getPlaylistDetails(playlist.uri, $event)" aria-label="playlist info for {{name}}">
+                    
+                    <md-tooltip md-direction="right">Playlist Info</md-tooltip>
+                    <i class="fa fa-info-circle"></i>
+
+                </a></td>
+            </tr></table>
+        </li>
+    </ul>
+
+    <!-- load more playlists -->
+    <div class="load-more" ng-if="playlists.next !== null">
+        <a href="javascript:void(0)" ng-click="loadMorePlaylists()">load more</a>
     </div>
 
-    <!-- rest helper service -->
-    <script src="js/rest-helper.js"></script>
+</div><!--playlist-list-->
 
-    <!-- controller script -->
-    <script src="js/controller.js"></script>
+</div><!--playlist-select-->
+
+</form>
+</md-content>
+
+<!-- submission button -->
+<div class="submission">
+    <md-button class="md-raised md-primary" ng-click="submitForm($event)" ng-disabled="selectedPlaylists.length == 0">
+        Create playlist
+    </md-button>
+</div>
+
+</div><!--input form-->
+
+</div><!--container-->
+
+<!-- footer -->
+<div class="footer">
+    <p>
+        © Olivia Wan 2018, all rights reserved &middot;
+        <a href="https://github.com/omwan/latest-addition" target="_blank">Github</a> &middot; 
+        <a href="/swagger-ui.html" target="_blank">Swagger</a>
+    </p>
+</div>
+
+<!-- angular services + controllers -->
+<script src="js/rest-helper.js"></script>
+<script src="js/controller.js"></script>
 
 </body>
 </html>

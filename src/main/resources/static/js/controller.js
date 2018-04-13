@@ -32,6 +32,7 @@ app.controller('controller', ['$scope', '$http', '$mdDialog', 'rest', '$mdToast'
                 $scope.playlists = response.data;
             }
         };
+        
         // var url = "../mock_responses/playlists.json"
         var url = "/api/playlist/userplaylists";
         rest.getData(url, null, successHandler,
@@ -51,10 +52,12 @@ app.controller('controller', ['$scope', '$http', '$mdDialog', 'rest', '$mdToast'
                     $scope.playlists.items = origPlaylists;
                 }
             };
+
             var params = {
                 "offset": $scope.playlists.offset + $scope.playlists.limit,
                 "limit": $scope.playlists.limit
             };
+
             rest.getData("/api/playlist/userplaylists", params, successHandler,
                 "Unable to retrieve next page of user playlists");
         } else {
@@ -102,6 +105,7 @@ app.controller('controller', ['$scope', '$http', '$mdDialog', 'rest', '$mdToast'
                     $scope.playlist = response.data;
                 }
             };
+
             rest.getData("/api/playlist/details", {"uri": uri}, successHandler,
                 "Unable to retrieve details for playlist");
         }
@@ -116,8 +120,7 @@ app.controller('controller', ['$scope', '$http', '$mdDialog', 'rest', '$mdToast'
         var idx = list.indexOf(item);
         if (idx > -1) {
             list.splice(idx, 1);
-        }
-        else {
+        } else {
             list.push(item);
         }
     };
@@ -197,6 +200,7 @@ app.controller('controller', ['$scope', '$http', '$mdDialog', 'rest', '$mdToast'
      */
     function CreationSuccessDialogController($scope, $mdDialog, url) {
         $scope.url = url;
+
         $scope.hide = function () {
             $mdDialog.hide();
         };
@@ -212,6 +216,7 @@ app.controller('controller', ['$scope', '$http', '$mdDialog', 'rest', '$mdToast'
                 $scope.submissionForm.playlistToOverwrite = $scope.existingPlaylists[0].uri;
             }
         };
+
         // var url = "../mock_responses/existing_playlists.json"
         var url = "/api/playlist/existing";
         rest.getData(url, null, successHandler,
