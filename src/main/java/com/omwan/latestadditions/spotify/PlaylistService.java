@@ -1,10 +1,12 @@
 package com.omwan.latestadditions.spotify;
 
 import com.omwan.latestadditions.dto.BuildPlaylistRequest;
+import com.omwan.latestadditions.dto.LatestPlaylistResponse;
 import com.omwan.latestadditions.dto.PlaylistUri;
 import com.wrapper.spotify.model_objects.specification.Paging;
 import com.wrapper.spotify.model_objects.specification.Playlist;
 import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
+import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
 
 import java.util.List;
 
@@ -15,11 +17,11 @@ public interface PlaylistService {
 
     Paging<PlaylistSimplified> getUserPlaylists(int limit, int offset);
 
-    Playlist getPlaylistDetails(String playlistURI);
+    Playlist getPlaylistDetails(String playlistUri);
 
     List<Playlist> getExistingPlaylists();
 
-    PlaylistUri buildLatestAdditionsPlaylist(BuildPlaylistRequest request);
+    LatestPlaylistResponse buildLatestAdditionsPlaylist(BuildPlaylistRequest request);
 
     void deleteSavedPlaylist(String playlistUri);
 }

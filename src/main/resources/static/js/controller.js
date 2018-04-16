@@ -154,11 +154,10 @@ app.controller('controller', ['$scope', '$http', '$mdDialog', 'rest', '$mdToast'
         }
 
         var successHandler = function (response) {
-            var playlistUrl = "https://open.spotify.com/user/{0}/playlist/{1}";
-            var params = [response.data.userId, response.data.playlistId];
             $mdDialog.show({
                 locals: {
-                    url: _formatString(playlistUrl, params)
+                    url: response.data.playlistUrl,
+                    tracks: response.data.tracklistPreview
                 },
                 controller: CreationSuccessDialogController,
                 templateUrl: '../templates/creation-success.tpl.html',
@@ -175,31 +174,14 @@ app.controller('controller', ['$scope', '$http', '$mdDialog', 'rest', '$mdToast'
     };
 
     /**
-     * String format util function.
-     * @param               template string to format
-     * @param               replacements string replacement arguments
-     * @returns {string}    formatted string
-     */
-    var _formatString = function (template, replacements) {
-        var replaceFunction = function (match, number) {
-            if (typeof replacements[number] !== 'undefined') {
-                return replacements[number];
-            } else {
-                return match;
-            }
-        };
-
-        return template.replace(/{(\d+)}/g, replaceFunction);
-    };
-
-    /**
      * Controller for playlist creation success dialog.
      * @param $scope            parent scope
      * @param $mdDialog         dialog module
      * @param url               link to playlist
      */
-    function CreationSuccessDialogController($scope, $mdDialog, url) {
+    function CreationSuccessDialogController($scope, $mdDialog, url, tracks) {
         $scope.url = url;
+        $scope.tracks = tracks;
 
         $scope.hide = function () {
             $mdDialog.hide();
@@ -221,6 +203,24 @@ app.controller('controller', ['$scope', '$http', '$mdDialog', 'rest', '$mdToast'
         var url = "/api/playlist/existing";
         rest.getData(url, null, successHandler,
             "Unable to retrieve existing playlists for current user");
+    };
+
+    /**
+     * String format util function.
+     * @param               template string to format
+     * @param               replacements string replacement arguments
+     * @returns {string}    formatted string
+     */
+    var _formatString = function (template, replacements) {
+        var replaceFunction = function (match, number) {
+            if (typeof replacements[number] !== 'undefined') {
+                return replacements[number];
+            } else {
+                return match;
+            }
+        };
+
+        return template.replace(/{(\d+)}/g, replaceFunction);
     };
 
     /**

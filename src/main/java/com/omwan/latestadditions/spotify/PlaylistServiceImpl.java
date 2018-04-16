@@ -4,6 +4,7 @@ import com.omwan.latestadditions.component.SpotifyApiComponent;
 import com.omwan.latestadditions.component.UriUtils;
 import com.omwan.latestadditions.component.UserPlaylistComponent;
 import com.omwan.latestadditions.dto.BuildPlaylistRequest;
+import com.omwan.latestadditions.dto.LatestPlaylistResponse;
 import com.omwan.latestadditions.dto.PlaylistUri;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.model_objects.specification.Paging;
@@ -130,7 +131,7 @@ public class PlaylistServiceImpl implements PlaylistService {
      * @return URI of created or updated playlist
      */
     @Override
-    public PlaylistUri buildLatestAdditionsPlaylist(BuildPlaylistRequest request) {
+    public LatestPlaylistResponse buildLatestAdditionsPlaylist(BuildPlaylistRequest request) {
         List<PlaylistUri> playlists = request.getPlaylistUris().keySet().stream()
                 .map(UriUtils::buildPlaylistUri)
                 .collect(Collectors.toList());
@@ -144,11 +145,30 @@ public class PlaylistServiceImpl implements PlaylistService {
                 .toArray(new String[latestAdditionsTracks.size()]);
 
         String userId = spotifyApiComponent.getCurrentUserId();
+        PlaylistUri uri;
         if (request.isOverwriteExisting()) {
-            return overwriteExistingLatestAdditions(request.getPlaylistToOverwrite(), trackUris, userId);
+            uri = overwriteExistingLatestAdditions(request.getPlaylistToOverwrite(), trackUris, userId);
         } else {
-            return createNewLatestAdditions(trackUris, userId, request);
+            uri = createNewLatestAdditions(trackUris, userId, request);
         }
+        return buildTrackPreviewResponse(uri, latestAdditionsTracks);
+    }
+
+    /**
+     * Build a response object containing a link to the newly generated or updated playlist,
+     * as well as a preview the tracks in the playlist.
+     *
+     * @param uri    uri for playlist
+     * @param tracks list of tracks in playlist
+     * @return response object
+     */
+    private LatestPlaylistResponse buildTrackPreviewResponse(PlaylistUri uri,
+                                                             List<PlaylistTrack> tracks) {
+        LatestPlaylistResponse response = new LatestPlaylistResponse();
+        response.setPlaylistUrl(String.format("https://open.spotify.com/user/%s/playlist/%s",
+                uri.getUserId(), uri.getPlaylistId()));
+        response.setTracklistPreview(tracks.subList(0, Math.min(tracks.size(), 10)));
+        return response;
     }
 
     /**
@@ -254,6 +274,9 @@ public class PlaylistServiceImpl implements PlaylistService {
         } else {
             int skips = playlist.getSkipCount();
             if (skips != 0) {
+                if (skips <= 10) {
+                    skips = 10;
+                }
                 int offset = Math.max(playlist.getOffset() - skips, 0);
                 PlaylistTrack[] moreTracks = getTracksForPlaylist(playlist, skips,
                         offset);
@@ -292,7 +315,6 @@ public class PlaylistServiceImpl implements PlaylistService {
      * @param playlistToOverwrite playlist to overwrite
      * @param trackUris           list of track URIs for playlist
      * @param userId              user ID of current user
-     * @return URI of overwritten playlist
      */
     private PlaylistUri overwriteExistingLatestAdditions(String playlistToOverwrite,
                                                          String[] trackUris,
@@ -315,7 +337,6 @@ public class PlaylistServiceImpl implements PlaylistService {
      * @param trackUris list of track URIs for playlist
      * @param userId    user ID of current user
      * @param request   playlist specifications
-     * @return URI of newly created playlist
      */
     private PlaylistUri createNewLatestAdditions(String[] trackUris,
                                                  String userId,

@@ -3,6 +3,17 @@
 
     <md-dialog-content layout-padding="">
         <div class="md-title">Playlist successfully created</div>
+        <div>
+            These are the first {{tracks.length}} tracks:
+            <ul>
+                <li ng-repeat="track in tracks">
+                    <a href="{{track.track.href}}" target="spotify">{{track.track.name}}</a> | 
+                    <a href="{{track.track.artists[0].externalUrls.externalUrls.spotify}}" target="spotify">
+                        {{track.track.artists[0].name}}
+                    </a>
+                </li>
+            </ul>
+        </div>
     </md-dialog-content>
 
     <!-- close dialog button -->

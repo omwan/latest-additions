@@ -1,7 +1,7 @@
 package com.omwan.latestadditions.spotify;
 
 import com.omwan.latestadditions.dto.BuildPlaylistRequest;
-import com.omwan.latestadditions.dto.PlaylistUri;
+import com.omwan.latestadditions.dto.LatestPlaylistResponse;
 import com.wrapper.spotify.model_objects.specification.Paging;
 import com.wrapper.spotify.model_objects.specification.Playlist;
 import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
@@ -31,8 +31,8 @@ public class PlaylistController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/details")
-    public Playlist getPlaylistDetails(@RequestParam(name = "uri") String playlistURI) {
-        return playlistService.getPlaylistDetails(playlistURI);
+    public Playlist getPlaylistDetails(@RequestParam(name = "uri") String playlistUri) {
+        return playlistService.getPlaylistDetails(playlistUri);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/existing")
@@ -40,13 +40,13 @@ public class PlaylistController {
         return playlistService.getExistingPlaylists();
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, value = "/existing")
-    public void deleteSavedPlaylist(String playlistUri) {
-        playlistService.deleteSavedPlaylist(playlistUri);
+    @RequestMapping(method = RequestMethod.POST, value = "/build")
+    public LatestPlaylistResponse buildLatestAdditionsPlaylist(@RequestBody BuildPlaylistRequest request) {
+        return playlistService.buildLatestAdditionsPlaylist(request);
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/build")
-    public PlaylistUri buildLatestAdditionsPlaylist(@RequestBody BuildPlaylistRequest request) {
-        return playlistService.buildLatestAdditionsPlaylist(request);
+    @RequestMapping(method = RequestMethod.DELETE, value = "/existing")
+    public void deleteSavedPlaylist(@RequestParam(name = "uri") String playlistUri) {
+        playlistService.deleteSavedPlaylist(playlistUri);
     }
 }
