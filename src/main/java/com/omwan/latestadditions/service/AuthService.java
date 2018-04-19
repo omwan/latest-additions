@@ -1,4 +1,4 @@
-package com.omwan.latestadditions.spotify;
+package com.omwan.latestadditions.service;
 
 /**
  * Services relating to authentication.

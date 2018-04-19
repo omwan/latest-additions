@@ -1,4 +1,4 @@
-package com.omwan.latestadditions.spotify;
+package com.omwan.latestadditions.service;
 
 import com.omwan.latestadditions.component.SpotifyApiComponent;
 import com.wrapper.spotify.SpotifyApi;
@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Implementation of services relating to authentication.
+ * Implementation of services relating to authentication/authorization.
  */
 @Service
 public class AuthServiceImpl implements AuthService {

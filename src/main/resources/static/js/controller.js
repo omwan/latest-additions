@@ -1,8 +1,8 @@
 /**
  * Main controller for application.
  */
-app.controller('controller', ['$scope', '$http', '$mdDialog', 'rest', '$mdToast',
-    function ($scope, $http, $mdDialog, rest, $mdToast) {
+app.controller('controller', ['$scope', '$http', '$mdDialog', 'rest', 'endpoints',
+    function ($scope, $http, $mdDialog, rest, endpoints) {
 
     $scope.playlists = null;
     $scope.selectedPlaylists = [];
@@ -33,9 +33,7 @@ app.controller('controller', ['$scope', '$http', '$mdDialog', 'rest', '$mdToast'
             }
         };
         
-        // var url = "../mock_responses/playlists.json"
-        var url = "/api/playlist/userplaylists";
-        rest.getData(url, null, successHandler,
+        rest.getData(endpoints.GET_PLAYLISTS, null, successHandler,
             "Unable to retrieve user playlists");
     };
 
@@ -58,7 +56,7 @@ app.controller('controller', ['$scope', '$http', '$mdDialog', 'rest', '$mdToast'
                 "limit": $scope.playlists.limit
             };
 
-            rest.getData("/api/playlist/userplaylists", params, successHandler,
+            rest.getData(endpoints.GET_PLAYLISTS, params, successHandler,
                 "Unable to retrieve next page of user playlists");
         } else {
             return null;
@@ -106,8 +104,8 @@ app.controller('controller', ['$scope', '$http', '$mdDialog', 'rest', '$mdToast'
                 }
             };
 
-            rest.getData("/api/playlist/details", {"uri": uri}, successHandler,
-                "Unable to retrieve details for playlist");
+            rest.getData(_formatString(endpoints.GET_PLAYLIST_DETAILS, uri), null,
+                successHandler, "Unable to retrieve details for playlist");
         }
     }
 
@@ -167,7 +165,7 @@ app.controller('controller', ['$scope', '$http', '$mdDialog', 'rest', '$mdToast'
             });
         };
 
-        rest.postData("/api/playlist/build", null, $scope.submissionForm, successHandler,
+        rest.postData(endpoints.BUILD_PLAYLIST, null, $scope.submissionForm, successHandler,
             "Unable to create playlist with given parameters");
 
         $scope.submissionForm.description = null;
@@ -175,9 +173,10 @@ app.controller('controller', ['$scope', '$http', '$mdDialog', 'rest', '$mdToast'
 
     /**
      * Controller for playlist creation success dialog.
-     * @param $scope            parent scope
-     * @param $mdDialog         dialog module
-     * @param url               link to playlist
+     * @param $scope      parent scope
+     * @param $mdDialog   dialog module
+     * @param url         link to playlist
+     * @param tracks      tracklist preview for playlist
      */
     function CreationSuccessDialogController($scope, $mdDialog, url, tracks) {
         $scope.url = url;
@@ -199,9 +198,7 @@ app.controller('controller', ['$scope', '$http', '$mdDialog', 'rest', '$mdToast'
             }
         };
 
-        // var url = "../mock_responses/existing_playlists.json"
-        var url = "/api/playlist/existing";
-        rest.getData(url, null, successHandler,
+        rest.getData(endpoints.GET_EXISTING_PLAYLISTS, null, successHandler,
             "Unable to retrieve existing playlists for current user");
     };
 

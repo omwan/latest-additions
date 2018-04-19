@@ -1,27 +1,19 @@
-package com.omwan.latestadditions.spotify;
+package com.omwan.latestadditions.service;
 
 import com.omwan.latestadditions.dto.BuildPlaylistRequest;
 import com.omwan.latestadditions.dto.LatestPlaylistResponse;
-import com.omwan.latestadditions.dto.PlaylistUri;
 import com.wrapper.spotify.model_objects.specification.Paging;
 import com.wrapper.spotify.model_objects.specification.Playlist;
 import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
-import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
-
-import java.util.List;
 
 /**
- * Services pertaining to playlists.
+ * Services pertaining to spotify playlists.
  */
-public interface PlaylistService {
+public interface SpotifyPlaylistService {
 
     Paging<PlaylistSimplified> getUserPlaylists(int limit, int offset);
 
     Playlist getPlaylistDetails(String playlistUri);
 
-    List<Playlist> getExistingPlaylists();
-
     LatestPlaylistResponse buildLatestAdditionsPlaylist(BuildPlaylistRequest request);
-
-    void deleteSavedPlaylist(String playlistUri);
 }

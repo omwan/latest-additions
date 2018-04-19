@@ -1,5 +1,6 @@
-package com.omwan.latestadditions.spotify;
+package com.omwan.latestadditions.controller;
 
+import com.omwan.latestadditions.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -16,12 +17,12 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
-    @RequestMapping(method = RequestMethod.GET, value = "/init")
+    @RequestMapping(method = RequestMethod.GET, value = "")
     public void authorize() {
         authService.authorize();
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/accesstoken")
+    @RequestMapping(method = RequestMethod.GET, value = "/tokens")
     public void setToken(@RequestParam(name = "code") String token) {
         authService.setToken(token);
     }
