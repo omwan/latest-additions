@@ -1,0 +1,33 @@
+<!-- dialog for individual playlist details -->
+<md-dialog aria-label="Details for playlist {{playlist.name}}" class="tracklist-preview-dialog">
+
+    <md-dialog-content layout-padding="">
+        <div class="md-title">Tracklist Preview</div>
+        <ul class="preview-tracks">
+            <li ng-repeat="track in tracks" class="preview-track">
+                <a href="{{track.track.externalUrls.externalUrls.spotify}}" target="spotify" class="track-name">
+                    <b>{{track.track.name}}</b>
+                </a><br/>
+                <span>
+                    <a ng-repeat="artist in track.track.artists" href="{{artist.externalUrls.externalUrls.spotify}}" target="spotify" class="track-artist">
+                        {{artist.name}}<span ng-if="!$last">, </span>
+                    </a> &middot; 
+                    <a href="{{track.track.album.externalUrls.externalUrls.spotify}}" target="spotify">
+                        {{track.track.album.name}}
+                    </a>
+                </span>
+            </li>
+        </ul>
+    </md-dialog-content>
+
+    <!-- close dialog button -->
+    <md-dialog-actions layout="row">
+        <md-button ng-click="hide()">
+            close
+        </md-button>
+        <md-button href="{{url}}" target="spotify" class="md-raised md-primary">
+            Open in Spotify
+        </md-button>
+    </md-dialog-actions>
+
+</md-dialog>

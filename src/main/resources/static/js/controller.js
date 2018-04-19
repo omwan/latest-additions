@@ -104,7 +104,8 @@ app.controller('controller', ['$scope', '$http', '$mdDialog', 'rest', 'endpoints
                 }
             };
 
-            rest.getData(_formatString(endpoints.GET_PLAYLIST_DETAILS, uri), null,
+            console.log(uri)
+            rest.getData(_formatString(endpoints.GET_PLAYLIST_DETAILS, [uri]), null,
                 successHandler, "Unable to retrieve details for playlist");
         }
     }
@@ -157,8 +158,8 @@ app.controller('controller', ['$scope', '$http', '$mdDialog', 'rest', 'endpoints
                     url: response.data.playlistUrl,
                     tracks: response.data.tracklistPreview
                 },
-                controller: CreationSuccessDialogController,
-                templateUrl: '../templates/creation-success.tpl.html',
+                controller: TracklistPreviewController,
+                templateUrl: '../templates/tracklist-preview.tpl.html',
                 parent: angular.element(document.body),
                 targetEvent: event,
                 clickOutsideToClose: true
@@ -172,13 +173,13 @@ app.controller('controller', ['$scope', '$http', '$mdDialog', 'rest', 'endpoints
     };
 
     /**
-     * Controller for playlist creation success dialog.
+     * Controller for tracklist preview success dialog.
      * @param $scope      parent scope
      * @param $mdDialog   dialog module
      * @param url         link to playlist
      * @param tracks      tracklist preview for playlist
      */
-    function CreationSuccessDialogController($scope, $mdDialog, url, tracks) {
+    function TracklistPreviewController($scope, $mdDialog, url, tracks) {
         $scope.url = url;
         $scope.tracks = tracks;
 

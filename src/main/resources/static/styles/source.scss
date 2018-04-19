@@ -185,6 +185,32 @@ md-dialog.playlist-details-dialog {
 	}
 }
 
+md-dialog.tracklist-preview-dialog {
+	width:400px;
+
+	.md-title {
+		text-align:center;
+	}
+
+	.preview-tracks {
+		margin:0px;
+
+		li {
+			list-style-type:none;
+			padding:5px 0;
+		}
+
+		a {
+			color:#555;
+			text-decoration:none;
+		}
+
+		a:hover {
+			color:#aaa;
+		}
+	}
+}
+
 // submit button
 .submission {
 	padding:10px;
@@ -240,7 +266,7 @@ md-radio-button {
 	}
 }
 
-md-dialog md-dialog-actions {
+md-dialog md-dialog-actions, md-dialog.md-content-overflow md-dialog-actions {
 	border-top:1px solid #eee;
 }
 

@@ -24,7 +24,7 @@ public class SpotifyPlaylistController {
     @Autowired
     private SpotifyPlaylistService spotifyPlaylistService;
 
-    @RequestMapping(method = RequestMethod.GET, value = "/")
+    @RequestMapping(method = RequestMethod.GET, value = "")
     public Paging<PlaylistSimplified> getUserPlaylists(@RequestParam(name = "limit", defaultValue = "40") int limit,
                                                        @RequestParam(name = "offset", defaultValue = "0") int offset) {
         return spotifyPlaylistService.getUserPlaylists(limit, offset);
@@ -35,7 +35,7 @@ public class SpotifyPlaylistController {
         return spotifyPlaylistService.getPlaylistDetails(playlistUri);
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/")
+    @RequestMapping(method = RequestMethod.POST, value = "")
     public LatestPlaylistResponse buildLatestAdditionsPlaylist(@RequestBody BuildPlaylistRequest request) {
         return spotifyPlaylistService.buildLatestAdditionsPlaylist(request);
     }
