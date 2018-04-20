@@ -43,6 +43,14 @@ In the right panel, all of your playlists (including those that you follow) are 
 
 ## Screencaps
 
+Main application view:
+
 ![app main view](screencaps/app_main_view.png)
 
-![plalist details dialog](screencaps/playlist_details_dialog.png)
+Upon clicking the info button next to each playlist name, a popup dialog opens containing more details about the playlist including its title, owner, description, and number of tracks.
+
+![playlist details dialog](screencaps/playlist_details_dialog.png)
+
+Upon successful playlist creation after submitting the form, a popup dialog opens showing the first 10 tracks of the playlist, and linking to the playlist on Spotify.
+
+![tracklist preview dialog](screencaps/tracklist_preview_dialog.png)
