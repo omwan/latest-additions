@@ -9,7 +9,10 @@ import com.wrapper.spotify.requests.data.AbstractDataRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.WebUtils;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.URI;
@@ -31,8 +34,18 @@ public class SpotifyApiComponent {
 
     @Autowired
     @SuppressWarnings("SpringJavaAutowiringInspection")
+    private HttpServletRequest request;
+
+    @Autowired
+    @SuppressWarnings("SpringJavaAutowiringInspection")
     private HttpSession session;
 
+    /**
+     * Build instance of SpotifyApi with spotify client, secret, and redirect
+     * from environment variables.
+     *
+     * @return SpotifyApi instance.
+     */
     public SpotifyApi getSpotifyApi() {
         return new SpotifyApi.Builder()
                 .setClientId(spotifyClient)
@@ -50,17 +63,28 @@ public class SpotifyApiComponent {
     public SpotifyApi getApiWithTokens() {
         SpotifyApi spotifyApi = getSpotifyApi();
 
-        Object accessToken = session.getAttribute("ACCESS_TOKEN");
-        Object refreshToken = session.getAttribute("REFRESH_TOKEN");
+        String accessToken = getCookieValue("ACCESS_TOKEN");
+        String refreshToken = getCookieValue("REFRESH_TOKEN");
 
-        if (accessToken == null || refreshToken == null) {
-            throw new RuntimeException("Access and refresh token not yet saved to session");
-        }
-
-        spotifyApi.setAccessToken(accessToken.toString());
-        spotifyApi.setRefreshToken(refreshToken.toString());
+        spotifyApi.setAccessToken(accessToken);
+        spotifyApi.setRefreshToken(refreshToken);
 
         return spotifyApi;
+    }
+
+    /**
+     * Retrieve the value of the given cookie name, or throw an appropriate exception
+     * if the cookie does not exist.
+     *
+     * @param cookieName name of cookie to retrieve value for
+     * @return value of cookie
+     */
+    private String getCookieValue(String cookieName) {
+        Cookie cookie = WebUtils.getCookie(request, cookieName);
+        if (cookie == null) {
+            throw new RuntimeException("Cookie " + cookieName + " does not exist");
+        }
+        return cookie.getValue();
     }
 
     /**
@@ -70,8 +94,8 @@ public class SpotifyApiComponent {
      * @return whether or not access/refresh tokens exist as session attributes.
      */
     public boolean tokensExist() {
-        return session.getAttribute("ACCESS_TOKEN") != null
-                && session.getAttribute("REFRESH_TOKEN") != null;
+        return WebUtils.getCookie(request, "ACCESS_TOKEN") != null
+                && WebUtils.getCookie(request, "REFRESH_TOKEN") != null;
     }
 
     /**

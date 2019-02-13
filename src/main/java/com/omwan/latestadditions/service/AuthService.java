@@ -1,11 +1,13 @@
 package com.omwan.latestadditions.service;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * Services relating to authentication.
  */
 public interface AuthService {
 
-    void authorize();
+    void authorize(HttpServletResponse response);
 
-    void setToken(String token);
+    void setToken(String token, HttpServletResponse response);
 }
