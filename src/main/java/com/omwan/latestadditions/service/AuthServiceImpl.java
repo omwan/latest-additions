@@ -7,10 +7,11 @@ import com.wrapper.spotify.model_objects.credentials.AuthorizationCodeCredential
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
@@ -25,19 +26,14 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private SpotifyApiComponent spotifyApiComponent;
 
-    @Autowired
-    @SuppressWarnings("SpringJavaAutowiringInspection")
-    private HttpSession session;
-
-    @Autowired
-    @SuppressWarnings("SpringJavaAutowiringInspection")
-    private HttpServletResponse response;
+    @Value("${cookie.domain}")
+    private String cookieDomain;
 
     /**
      * Make authorization request for API usage.
      */
     @Override
-    public void authorize() {
+    public void authorize(HttpServletResponse response) {
         List<String> scopes = Arrays.asList(
                 "playlist-read-private",
                 "playlist-modify-private",
@@ -50,7 +46,7 @@ public class AuthServiceImpl implements AuthService {
                 .show_dialog(true)
                 .build();
         URI authUri = authorizationCodeUriRequest.execute();
-        handleRedirect(authUri.toString(), "Could not redirect to permissions page");
+        handleRedirect(response, authUri.toString(), "Could not redirect to permissions page");
     }
 
     /**
@@ -59,18 +55,26 @@ public class AuthServiceImpl implements AuthService {
      * @param token access token
      */
     @Override
-    public void setToken(String token) {
+    public void setToken(String token, HttpServletResponse response) {
         SpotifyApi spotifyApi = spotifyApiComponent.getSpotifyApi();
         AuthorizationCodeRequest authorizationCodeRequest = spotifyApi.authorizationCode(token)
                 .build();
         try {
             AuthorizationCodeCredentials authorizationCodeCredentials = authorizationCodeRequest.execute();
-            session.setAttribute("ACCESS_TOKEN", authorizationCodeCredentials.getAccessToken());
-            session.setAttribute("REFRESH_TOKEN", authorizationCodeCredentials.getRefreshToken());
-            handleRedirect("/", "Could not redirect to application main page");
+            response.addCookie(buildCookie("ACCESS_TOKEN", authorizationCodeCredentials.getAccessToken()));
+            response.addCookie(buildCookie("REFRESH_TOKEN", authorizationCodeCredentials.getRefreshToken()));
+            handleRedirect(response, "/", "Could not redirect to application main page");
         } catch (IOException | SpotifyWebApiException e) {
             throw new RuntimeException("Could not retrieve auth code credentials", e);
         }
+    }
+
+    private Cookie buildCookie(String name, String value) {
+        Cookie cookie = new Cookie(name, value);
+        cookie.setDomain(cookieDomain);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        return cookie;
     }
 
     /**
@@ -79,7 +83,7 @@ public class AuthServiceImpl implements AuthService {
      * @param url          address to send redirect to
      * @param errorMessage error message to return if redirect fails
      */
-    private void handleRedirect(String url, String errorMessage) {
+    private void handleRedirect(HttpServletResponse response, String url, String errorMessage) {
         try {
             response.sendRedirect(url);
         } catch (IOException e) {

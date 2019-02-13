@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * Controller for authentication-related services.
  */
@@ -18,12 +20,13 @@ public class AuthController {
     private AuthService authService;
 
     @RequestMapping(method = RequestMethod.GET, value = "")
-    public void authorize() {
-        authService.authorize();
+    public void authorize(HttpServletResponse response) {
+        authService.authorize(response);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/tokens")
-    public void setToken(@RequestParam(name = "code") String token) {
-        authService.setToken(token);
+    public void setToken(@RequestParam(name = "code") String token,
+                         HttpServletResponse response) {
+        authService.setToken(token, response);
     }
 }
