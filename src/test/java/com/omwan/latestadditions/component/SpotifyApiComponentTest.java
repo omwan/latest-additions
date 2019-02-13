@@ -9,7 +9,10 @@ import mockit.MockUp;
 import mockit.Tested;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.web.util.WebUtils;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import static org.junit.Assert.assertEquals;
@@ -21,6 +24,9 @@ public class SpotifyApiComponentTest {
 
     @Tested
     private SpotifyApiComponent spotifyApiComponent;
+
+    @Injectable
+    private HttpServletRequest request;
 
     @Injectable
     private HttpSession httpSession;
@@ -57,13 +63,17 @@ public class SpotifyApiComponentTest {
     public void testGetApiWithTokens() {
         final String expectedAccessToken = "access token";
         final String expectedRefreshToken = "refresh token";
-        new Expectations() {{
-            httpSession.getAttribute("ACCESS_TOKEN");
-            returns(mockSessionAttribute(expectedAccessToken));
 
-            httpSession.getAttribute("REFRESH_TOKEN");
-            returns(mockSessionAttribute(expectedRefreshToken));
-        }};
+        new MockUp<WebUtils>() {
+            @Mock
+            public Cookie getCookie(HttpServletRequest request, String cookieName) {
+                if (cookieName.equals("ACCESS_TOKEN")) {
+                    return new Cookie(cookieName, expectedAccessToken);
+                } else {
+                    return new Cookie(cookieName, expectedRefreshToken);
+                }
+            }
+        };
 
         SpotifyApi actual = spotifyApiComponent.getApiWithTokens();
         assertEquals(actual.getClientId(), SPOTIFY_CLIENT);
@@ -79,13 +89,12 @@ public class SpotifyApiComponentTest {
      */
     @Test(expected = RuntimeException.class)
     public void testGetApiWithTokensMissingAttributes() {
-        new Expectations() {{
-            httpSession.getAttribute("ACCESS_TOKEN");
-            returns(null);
-
-            httpSession.getAttribute("REFRESH_TOKEN");
-            returns(null);
-        }};
+        new MockUp<WebUtils>() {
+            @Mock
+            public Cookie getCookie(HttpServletRequest request, String cookieName) {
+                return null;
+            }
+        };
 
         spotifyApiComponent.getApiWithTokens();
     }
