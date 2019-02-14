@@ -61,7 +61,7 @@ public class SpotifyPlaylistServiceImplTest {
     }
 
     /**
-     * Assert that if the session attributes containing the access tokens are
+     * Assert that if the cookies containing the access tokens are
      * not set, the function returns an empty response.
      */
     @Test
