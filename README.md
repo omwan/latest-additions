@@ -33,11 +33,9 @@ In the right panel, all of your playlists (including those that you follow) are 
 
 **Other todos:**
 
-* save auth tokens to cookies instead of session history
 * load selected feeder playlists for existing playlist
 * cache loaded playlists instead of making API call on every refresh
 * set minimum amount for skip track calls
-* include preview of first 5-10 tracks of generated latest additions playlist in popup 
 * inform users if any local tracks are skipped?
 * include playlist title in mongodb document
 
