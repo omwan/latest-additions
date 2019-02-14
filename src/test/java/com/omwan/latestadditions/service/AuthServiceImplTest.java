@@ -1,12 +1,12 @@
 package com.omwan.latestadditions.service;
 
+import com.omwan.latestadditions.component.CookieUtils;
 import com.omwan.latestadditions.component.SpotifyApiComponent;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.credentials.AuthorizationCodeCredentials;
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
-import mockit.Deencapsulation;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Mock;
@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.net.URI;
 
@@ -24,16 +25,18 @@ import java.net.URI;
  */
 public class AuthServiceImplTest {
 
-    private final static String COOKIE_DOMAIN = "domain";
     @Tested
     private AuthService authService;
+
     @Injectable
     private SpotifyApiComponent spotifyApiComponent;
+
+    @Injectable
+    private CookieUtils cookieUtils;
 
     @Before
     public void setup() {
         authService = new AuthServiceImpl();
-        Deencapsulation.setField(authService, "cookieDomain", COOKIE_DOMAIN);
     }
 
     /**
@@ -46,6 +49,7 @@ public class AuthServiceImplTest {
     public void testAuthorize() throws Exception {
         final String authUri = "auth";
         HttpServletResponse response = new MockHttpServletResponse();
+
         new MockUp<AuthorizationCodeUriRequest>() {
             @Mock
             public URI execute() {
@@ -59,12 +63,11 @@ public class AuthServiceImplTest {
         }};
 
         authService.authorize(response);
-
     }
 
     /**
      * Assert that the access and refresh tokens can be successfully retrieved
-     * and set as session attributes.
+     * and set as cookies.
      */
     @Test
     public void testSetToken() throws Exception {
@@ -72,6 +75,7 @@ public class AuthServiceImplTest {
         final String accessToken = "access token";
         final String refreshToken = "refresh token";
         final HttpServletResponse response = new MockHttpServletResponse();
+
         new MockUp<AuthorizationCodeRequest>() {
             @Mock
             public AuthorizationCodeCredentials execute() {
@@ -82,6 +86,11 @@ public class AuthServiceImplTest {
         new Expectations() {{
             spotifyApiComponent.getSpotifyApi();
             returns(buildMockSpotifyApi());
+
+            cookieUtils.buildCookie("ACCESS_TOKEN", accessToken);
+            returns(new Cookie("ACCESS_TOKEN", accessToken));
+            cookieUtils.buildCookie("REFRESH_TOKEN", refreshToken);
+            returns(new Cookie("REFRESH_TOKEN", refreshToken));
         }};
 
         authService.setToken(token, response);
@@ -95,6 +104,7 @@ public class AuthServiceImplTest {
     public void testSetTokenSpotifyException() throws Exception {
         final String token = "token";
         HttpServletResponse response = new MockHttpServletResponse();
+
         new MockUp<AuthorizationCodeRequest>() {
             @Mock
             public AuthorizationCodeCredentials execute() throws Exception {

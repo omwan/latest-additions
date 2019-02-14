@@ -9,10 +9,10 @@ import mockit.MockUp;
 import mockit.Tested;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.web.util.WebUtils;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import static org.junit.Assert.assertEquals;
@@ -22,6 +22,10 @@ import static org.junit.Assert.assertEquals;
  */
 public class SpotifyApiComponentTest {
 
+    private final static String SPOTIFY_CLIENT = "client";
+    private final static String SPOTIFY_CLIENT_SECRET = "secret";
+    private final static String SPOTIFY_REDIRECT_URI = "redirect";
+
     @Tested
     private SpotifyApiComponent spotifyApiComponent;
 
@@ -29,11 +33,13 @@ public class SpotifyApiComponentTest {
     private HttpServletRequest request;
 
     @Injectable
+    private HttpServletResponse response;
+
+    @Injectable
     private HttpSession httpSession;
 
-    private final static String SPOTIFY_CLIENT = "client";
-    private final static String SPOTIFY_CLIENT_SECRET = "secret";
-    private final static String SPOTIFY_REDIRECT_URI = "redirect";
+    @Injectable
+    private CookieUtils cookieUtils;
 
     @Before
     public void setup() {
@@ -57,23 +63,20 @@ public class SpotifyApiComponentTest {
 
     /**
      * Assert that the access and refresh tokens can be successfully retrieved
-     * from the session attributes and set in a spotify api instance.
+     * from the cookies and set in a spotify api instance.
      */
     @Test
     public void testGetApiWithTokens() {
         final String expectedAccessToken = "access token";
         final String expectedRefreshToken = "refresh token";
 
-        new MockUp<WebUtils>() {
-            @Mock
-            public Cookie getCookie(HttpServletRequest request, String cookieName) {
-                if (cookieName.equals("ACCESS_TOKEN")) {
-                    return new Cookie(cookieName, expectedAccessToken);
-                } else {
-                    return new Cookie(cookieName, expectedRefreshToken);
-                }
-            }
-        };
+        new Expectations() {{
+            cookieUtils.getCookieValue(request, "ACCESS_TOKEN");
+            returns(expectedAccessToken);
+
+            cookieUtils.getCookieValue(request, "REFRESH_TOKEN");
+            returns(expectedRefreshToken);
+        }};
 
         SpotifyApi actual = spotifyApiComponent.getApiWithTokens();
         assertEquals(actual.getClientId(), SPOTIFY_CLIENT);
@@ -84,55 +87,14 @@ public class SpotifyApiComponentTest {
     }
 
     /**
-     * Assert that if the access and refresh tokens cannot be retrieved from the
-     * session attributes, the appropriate exception is thrown.
-     */
-    @Test(expected = RuntimeException.class)
-    public void testGetApiWithTokensMissingAttributes() {
-        new MockUp<WebUtils>() {
-            @Mock
-            public Cookie getCookie(HttpServletRequest request, String cookieName) {
-                return null;
-            }
-        };
-
-        spotifyApiComponent.getApiWithTokens();
-    }
-
-    /**
-     * Assert that the current user's ID can be retrieved from the spotify API
-     * and set as a session attribute.
+     * Assert that the current user's ID can be retrieved from the cookie.
      */
     @Test
-    public void testGetCurrentUserIdNoSessionAttribute() {
-        final String expectedUserId = "user ID";
-        new MockUp<SpotifyApiComponent>() {
-            @Mock
-            public String getCurrentUserIdFromApi() {
-                return expectedUserId;
-            }
-        };
-
-        new Expectations() {{
-            httpSession.getAttribute("USER_ID");
-            returns(null);
-
-            httpSession.setAttribute("USER_ID", expectedUserId);
-        }};
-
-        String actual = spotifyApiComponent.getCurrentUserId();
-        assertEquals(actual, expectedUserId);
-    }
-
-    /**
-     * Assert that the current user's ID can be retrieved from the session attributes.
-     */
-    @Test
-    public void testGetCurrentUserIdWithSessionAttribute() {
+    public void testGetCurrentUserIdWithCookie() {
         final String expectedUserId = "user ID";
 
         new Expectations() {{
-            httpSession.getAttribute("USER_ID");
+            cookieUtils.getCookieValue(request, "USER_ID");
             returns(expectedUserId);
         }};
 
@@ -141,17 +103,33 @@ public class SpotifyApiComponentTest {
     }
 
     /**
-     * Mock a session attribute with the given value.
-     *
-     * @param value value of the session attribute to mock
-     * @return mocked session attribute object
+     * Assert that if the current user ID has not yet been set as a cookie,
+     * it can be retrieved from the API and then is set as a cookie.
      */
-    private MockUp<Object> mockSessionAttribute(String value) {
-        return new MockUp<Object>() {
+    @Test
+    public void testGetCurrentUserIdWithoutCookie() throws Exception {
+        final String expectedUserId = "user ID";
+
+        new MockUp<SpotifyApiComponent>() {
             @Mock
-            public String toString() {
-                return value;
+            public String getCurrentUserIdFromApi() {
+                return expectedUserId;
             }
         };
+
+        final Cookie userIdCookie = new Cookie("USER_ID", expectedUserId);
+
+        new Expectations() {{
+            cookieUtils.getCookieValue(request, "USER_ID");
+            result = new RuntimeException();
+
+            cookieUtils.buildCookie("USER_ID", expectedUserId);
+            returns(userIdCookie);
+
+            response.addCookie(userIdCookie);
+        }};
+
+        String actual = spotifyApiComponent.getCurrentUserId();
+        assertEquals(actual, expectedUserId);
     }
 }
