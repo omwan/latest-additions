@@ -1,5 +1,6 @@
 package com.omwan.latestadditions.service;
 
+import com.omwan.latestadditions.component.CookieUtils;
 import com.omwan.latestadditions.component.SpotifyApiComponent;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
@@ -7,10 +8,8 @@ import com.wrapper.spotify.model_objects.credentials.AuthorizationCodeCredential
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
@@ -26,8 +25,8 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private SpotifyApiComponent spotifyApiComponent;
 
-    @Value("${cookie.domain}")
-    private String cookieDomain;
+    @Autowired
+    private CookieUtils cookieUtils;
 
     /**
      * Make authorization request for API usage.
@@ -61,20 +60,14 @@ public class AuthServiceImpl implements AuthService {
                 .build();
         try {
             AuthorizationCodeCredentials authorizationCodeCredentials = authorizationCodeRequest.execute();
-            response.addCookie(buildCookie("ACCESS_TOKEN", authorizationCodeCredentials.getAccessToken()));
-            response.addCookie(buildCookie("REFRESH_TOKEN", authorizationCodeCredentials.getRefreshToken()));
+            response.addCookie(cookieUtils.buildCookie("ACCESS_TOKEN",
+                    authorizationCodeCredentials.getAccessToken()));
+            response.addCookie(cookieUtils.buildCookie("REFRESH_TOKEN",
+                    authorizationCodeCredentials.getRefreshToken()));
             handleRedirect(response, "/", "Could not redirect to application main page");
         } catch (IOException | SpotifyWebApiException e) {
             throw new RuntimeException("Could not retrieve auth code credentials", e);
         }
-    }
-
-    private Cookie buildCookie(String name, String value) {
-        Cookie cookie = new Cookie(name, value);
-        cookie.setDomain(cookieDomain);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        return cookie;
     }
 
     /**

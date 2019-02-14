@@ -11,9 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.WebUtils;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
 
@@ -38,7 +37,10 @@ public class SpotifyApiComponent {
 
     @Autowired
     @SuppressWarnings("SpringJavaAutowiringInspection")
-    private HttpSession session;
+    private HttpServletResponse response;
+
+    @Autowired
+    private CookieUtils cookieUtils;
 
     /**
      * Build instance of SpotifyApi with spotify client, secret, and redirect
@@ -56,15 +58,15 @@ public class SpotifyApiComponent {
 
     /**
      * Build instance of SpotifyApi with access and refresh tokens set
-     * from session attributes.
+     * from cookies.
      *
      * @return SpotifyApi instance with access + refresh tokens
      */
     public SpotifyApi getApiWithTokens() {
         SpotifyApi spotifyApi = getSpotifyApi();
 
-        String accessToken = getCookieValue("ACCESS_TOKEN");
-        String refreshToken = getCookieValue("REFRESH_TOKEN");
+        String accessToken = cookieUtils.getCookieValue(request, "ACCESS_TOKEN");
+        String refreshToken = cookieUtils.getCookieValue(request, "REFRESH_TOKEN");
 
         spotifyApi.setAccessToken(accessToken);
         spotifyApi.setRefreshToken(refreshToken);
@@ -73,25 +75,9 @@ public class SpotifyApiComponent {
     }
 
     /**
-     * Retrieve the value of the given cookie name, or throw an appropriate exception
-     * if the cookie does not exist.
+     * Helper to check if access and refresh tokens have already been set as cookies.
      *
-     * @param cookieName name of cookie to retrieve value for
-     * @return value of cookie
-     */
-    private String getCookieValue(String cookieName) {
-        Cookie cookie = WebUtils.getCookie(request, cookieName);
-        if (cookie == null) {
-            throw new RuntimeException("Cookie " + cookieName + " does not exist");
-        }
-        return cookie.getValue();
-    }
-
-    /**
-     * Helper to check if access and refresh tokens have already been set as
-     * session attributes.
-     *
-     * @return whether or not access/refresh tokens exist as session attributes.
+     * @return whether or not access/refresh tokens exist as cookies.
      */
     public boolean tokensExist() {
         return WebUtils.getCookie(request, "ACCESS_TOKEN") != null
@@ -99,18 +85,19 @@ public class SpotifyApiComponent {
     }
 
     /**
-     * Retrieve user ID of current user, and save as a session attribute.
+     * Retrieve user ID of current user, and save as a cookie.
      *
      * @return user ID of current user
      */
     public String getCurrentUserId() {
-        Object userIdAttribute = session.getAttribute("USER_ID");
-        if (userIdAttribute == null) {
-            String userId = getCurrentUserIdFromApi();
-            session.setAttribute("USER_ID", userId);
+        String userId = "";
+        try {
+            userId = cookieUtils.getCookieValue(request, "USER_ID");
             return userId;
-        } else {
-            return userIdAttribute.toString();
+        } catch (RuntimeException e) {
+            userId = getCurrentUserIdFromApi();
+            response.addCookie(cookieUtils.buildCookie("USER_ID", userId));
+            return userId;
         }
     }
 
@@ -152,15 +139,17 @@ public class SpotifyApiComponent {
      */
     private void refreshToken() {
         SpotifyApi spotifyApi = getSpotifyApi();
-        spotifyApi.setRefreshToken(session.getAttribute("REFRESH_TOKEN").toString());
+        spotifyApi.setRefreshToken(cookieUtils.getCookieValue(request, "REFRESH_TOKEN"));
 
         try {
             AuthorizationCodeCredentials authorizationCodeCredentials = spotifyApi.authorizationCodeRefresh()
                     .build()
                     .execute();
 
-            session.setAttribute("ACCESS_TOKEN", authorizationCodeCredentials.getAccessToken());
-            session.setAttribute("REFRESH_TOKEN", authorizationCodeCredentials.getAccessToken());
+            response.addCookie(cookieUtils.buildCookie("ACCESS_TOKEN",
+                    authorizationCodeCredentials.getAccessToken()));
+            response.addCookie(cookieUtils.buildCookie("REFRESH_TOKEN",
+                    authorizationCodeCredentials.getRefreshToken()));
 
             System.out.println(String.format("Token successfully refreshed, expires in %s",
                     authorizationCodeCredentials.getExpiresIn()));
