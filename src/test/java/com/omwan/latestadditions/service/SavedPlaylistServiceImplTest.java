@@ -3,14 +3,15 @@ package com.omwan.latestadditions.service;
 
 import com.omwan.latestadditions.SpotifyTestUtils;
 import com.omwan.latestadditions.component.SpotifyApiComponent;
-import com.omwan.latestadditions.component.PlaylistUtils;
 import com.omwan.latestadditions.component.UserPlaylistComponent;
+import com.omwan.latestadditions.dto.PlaylistIdWrapper;
 import com.wrapper.spotify.model_objects.specification.Playlist;
 import com.wrapper.spotify.requests.data.AbstractDataRequest;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;
 import mockit.Verifications;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -47,7 +48,7 @@ public class SavedPlaylistServiceImplTest {
     @Test
     public void testGetExistingPlaylists() throws Exception {
         final String userId = "user ID";
-        final String playlistUri = "spotify:user:123:playlist:456";
+        final String playlistId = "playlist ID";
 
         new Expectations() {{
             spotifyApiComponent.tokensExist();
@@ -57,19 +58,20 @@ public class SavedPlaylistServiceImplTest {
             returns(userId);
 
             userPlaylistComponent.getPlaylistsForUser(userId);
-            returns(Collections.singletonList(PlaylistUtils.buildPlaylistWrapper(playlistUri, userId)));
+            returns(Collections.singletonList(new PlaylistIdWrapper(playlistId, userId)));
 
             spotifyApiComponent.getApiWithTokens();
             returns(SpotifyTestUtils.buildMockedSpotifyApi());
 
             spotifyApiComponent.executeRequest((AbstractDataRequest) any, anyString);
-            returns(SpotifyTestUtils.buildMockedPlaylist(playlistUri));
+            returns(SpotifyTestUtils.buildMockedPlaylist(playlistId));
         }};
 
         List<Playlist> actual = savedPlaylistService.getExistingPlaylists();
         assertTrue(actual.size() > 0);
         Playlist actualPlaylist = actual.get(0);
-        assertEquals(playlistUri, actualPlaylist.getUri());
+        System.out.println(ToStringBuilder.reflectionToString(actualPlaylist));
+        assertEquals(playlistId, actualPlaylist.getId());
     }
 
     /**
@@ -88,16 +90,16 @@ public class SavedPlaylistServiceImplTest {
 
     /**
      * Assert that the appropriate user playlist component method is called
-     * with the given playlist URI string.
+     * with the given playlist ID string.
      */
     @Test
     public void testDeleteSavedPlaylist() throws Exception {
-        final String playlistUri = "spotify:user:123:playlist:456";
+        final String playlistId = "playlist ID";
 
-        savedPlaylistService.deleteSavedPlaylist(playlistUri);
+        savedPlaylistService.deleteSavedPlaylist(playlistId);
 
         new Verifications() {{
-            userPlaylistComponent.deleteSavedPlaylist(playlistUri);
+            userPlaylistComponent.deleteSavedPlaylist(playlistId);
         }};
     }
 

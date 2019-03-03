@@ -15,6 +15,11 @@ public class PlaylistIdWrapper {
 
     }
 
+    public PlaylistIdWrapper(String playlistId, String userId) {
+        this.userId = userId;
+        this.playlistId = playlistId;
+    }
+
     public String getUserId() {
         return userId;
     }

@@ -19,22 +19,22 @@ public class UserPlaylistComponent {
     private UserPlaylistRepository userPlaylistRepository;
 
     /**
-     * Retrieve URIs of all saved playlists for a given user.
+     * Retrieve IDs of all saved playlists for a given user.
      *
      * @param userId user ID to retrieve playlists for
      * @return list of playlist wrapper objects.
      */
     public List<PlaylistIdWrapper> getPlaylistsForUser(String userId) {
         return userPlaylistRepository.findByUserId(userId).stream()
-                .map(userPlaylist -> PlaylistUtils.buildPlaylistWrapper(userPlaylist.getPlaylistId(), userId))
+                .map(userPlaylist -> new PlaylistIdWrapper(userPlaylist.getPlaylistId(), userId))
                 .collect(Collectors.toList());
     }
 
     /**
-     * Save a playlist URI for a given user.
+     * Save a playlist for a given user.
      *
      * @param userId     user ID to save playlist for
-     * @param playlistId playlist to save
+     * @param playlistId ID of playlist to save
      */
     public UserPlaylist saveUserPlaylist(String userId, String playlistId) {
         UserPlaylist userPlaylist = new UserPlaylist();
@@ -44,8 +44,8 @@ public class UserPlaylistComponent {
     }
 
     /**
-     * Delete the playlist with the given URI. If no playlists are found matching
-     * the given URI, an exception is thrown.
+     * Delete the playlist with the given ID. If no playlists are found matching
+     * the given ID, an exception is thrown.
      *
      * @param playlistId ID of playlist to delete.
      */

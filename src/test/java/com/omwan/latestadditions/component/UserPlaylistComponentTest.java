@@ -38,9 +38,9 @@ public class UserPlaylistComponentTest {
     @Test
     public void testGetPlaylistsForUser() {
         final String userId = "123";
-        final String playlistUri = String.format("spotify:user:%s:playlist:456", userId);
+        final String playlistId = "playlistId";
 
-        final UserPlaylist expected = createMockedUserPlaylist(userId, playlistUri);
+        final UserPlaylist expected = new UserPlaylist(userId, playlistId);
 
         new Expectations() {{
             userPlaylistRepository.findByUserId(userId);
@@ -50,52 +50,38 @@ public class UserPlaylistComponentTest {
         List<PlaylistIdWrapper> actual = userPlaylistComponent.getPlaylistsForUser(userId);
         assertTrue(actual.size() > 0);
         PlaylistIdWrapper playlist = actual.get(0);
-        assertEquals(playlist.toString(), playlistUri);
+        assertEquals(playlist.getPlaylistId(), playlistId);
     }
 
     /**
      * Assert that the appropriate repository method is called with the
-     * given playlist URI string.
+     * given playlist ID string.
      */
     @Test
     public void testDeleteSavedPlaylist() {
-        final String playlistUri = "spotify:user:123:playlist:456";
+        final String playlistId = "playlistId";
 
         new Expectations() {{
-            userPlaylistRepository.deleteByPlaylistId(playlistUri);
+            userPlaylistRepository.deleteByPlaylistId(playlistId);
             returns(1);
         }};
 
-        userPlaylistComponent.deleteSavedPlaylist(playlistUri);
+        userPlaylistComponent.deleteSavedPlaylist(playlistId);
     }
 
     /**
-     * Assert that if no playlists matching the given playlistUri are deleted,
+     * Assert that if no playlists matching the given playlist ID are deleted,
      * the appropriate exception is thrown.
      */
     @Test(expected = IllegalArgumentException.class)
     public void testDeleteSavedPlaylistInvalidUri() {
-        final String playlistUri = "spotify:user:123:playlist:456";
+        final String playlistId = "playlistId";
 
         new Expectations() {{
-            userPlaylistRepository.deleteByPlaylistId(playlistUri);
+            userPlaylistRepository.deleteByPlaylistId(playlistId);
             returns(0);
         }};
 
-        userPlaylistComponent.deleteSavedPlaylist(playlistUri);
-    }
-
-    /**
-     * Create a mocked UserPlaylist document instance with the given parameters.
-     *
-     * @param userId      user ID to mock
-     * @param playlistUri playlist URI to mock
-     * @return mocked UserPlaylist object
-     */
-    private UserPlaylist createMockedUserPlaylist(String userId, String playlistUri) {
-        UserPlaylist userPlaylist = new UserPlaylist();
-        userPlaylist.setUserId(userId);
-        userPlaylist.setPlaylistId(playlistUri);
-        return userPlaylist;
+        userPlaylistComponent.deleteSavedPlaylist(playlistId);
     }
 }

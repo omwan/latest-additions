@@ -1,6 +1,5 @@
 package com.omwan.latestadditions.service;
 
-import com.omwan.latestadditions.component.PlaylistUtils;
 import com.omwan.latestadditions.component.SpotifyApiComponent;
 import com.omwan.latestadditions.component.UserPlaylistComponent;
 import com.omwan.latestadditions.dto.BuildPlaylistRequest;
@@ -94,7 +93,7 @@ public class SpotifyPlaylistServiceImpl implements SpotifyPlaylistService {
     public LatestPlaylistResponse buildLatestAdditionsPlaylist(BuildPlaylistRequest request) {
         String userId = spotifyApiComponent.getCurrentUserId();
         List<PlaylistIdWrapper> playlists = request.getPlaylistIds().keySet().stream()
-                .map((String playlistId) -> PlaylistUtils.buildPlaylistWrapper(playlistId, userId))
+                .map((String playlistId) -> new PlaylistIdWrapper(playlistId, userId))
                 .collect(Collectors.toList());
 
         Map<PlaylistIdWrapper, LinkedList<PlaylistTrack>> playlistTracks =
@@ -281,7 +280,7 @@ public class SpotifyPlaylistServiceImpl implements SpotifyPlaylistService {
                                                                String[] trackUris,
                                                                String userId) {
         SpotifyApi spotifyApi = spotifyApiComponent.getApiWithTokens();
-        PlaylistIdWrapper playlistIdWrapper = PlaylistUtils.buildPlaylistWrapper(playlistToOverwrite, userId);
+        PlaylistIdWrapper playlistIdWrapper = new PlaylistIdWrapper(playlistToOverwrite, userId);
         AbstractDataRequest replaceTracksRequest = spotifyApi
                 .replacePlaylistsTracks(userId, playlistIdWrapper.getPlaylistId(), trackUris)
                 .build();
@@ -315,8 +314,7 @@ public class SpotifyPlaylistServiceImpl implements SpotifyPlaylistService {
         Playlist latestAdditions = spotifyApiComponent.executeRequest(createPlaylistRequest,
                 createPlaylistErrorMessage);
 
-        PlaylistIdWrapper playlistIdWrapper = PlaylistUtils
-                .buildPlaylistWrapper(latestAdditions.getId(), userId);
+        PlaylistIdWrapper playlistIdWrapper = new PlaylistIdWrapper(latestAdditions.getId(), userId);
         AbstractDataRequest addTracksRequest = spotifyApi
                 .addTracksToPlaylist(userId, playlistIdWrapper.getPlaylistId(), trackUris)
                 .build();
