@@ -25,9 +25,9 @@ public class SavedPlaylistController {
         return savedPlaylistService.getExistingPlaylists();
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, value = "/{uri}")
-    public void deleteSavedPlaylist(@PathVariable(name = "uri") String playlistUri) {
-        savedPlaylistService.deleteSavedPlaylist(playlistUri);
+    @RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
+    public void deleteSavedPlaylist(@PathVariable(name = "id") String playlistId) {
+        savedPlaylistService.deleteSavedPlaylist(playlistId);
     }
 
 }

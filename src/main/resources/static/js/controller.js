@@ -19,7 +19,7 @@ app.controller('controller', ['$scope', '$http', '$mdDialog', 'rest', 'endpoints
         description: null,
         isPublic: false,
         isCollaborative: false,
-        playlistUris: {},
+        playlistIds: {},
         playlistToOverwrite: null
     };
 
@@ -32,7 +32,7 @@ app.controller('controller', ['$scope', '$http', '$mdDialog', 'rest', 'endpoints
                 $scope.playlists = response.data;
             }
         };
-        
+
         rest.getData(endpoints.GET_PLAYLISTS, null, successHandler,
             "Unable to retrieve user playlists");
     };
@@ -64,14 +64,14 @@ app.controller('controller', ['$scope', '$http', '$mdDialog', 'rest', 'endpoints
     };
 
     /**
-     * Open the playlist details dialog for the given playlist URI.
-     * @param uri   playlist uri
+     * Open the playlist details dialog for the given playlist ID.
+     * @param id   playlist id
      * @param event click event for modal
      */
-    $scope.getPlaylistDetails = function (uri, event) {
+    $scope.getPlaylistDetails = function (id, event) {
         $mdDialog.show({
             locals: {
-                uri: uri,
+                id: id,
                 playlistDetails: $scope.playlistDetails
             },
             controller: PlaylistDetailsDialogController,
@@ -87,25 +87,24 @@ app.controller('controller', ['$scope', '$http', '$mdDialog', 'rest', 'endpoints
      * @param $scope            parent scope
      * @param $mdDialog         dialog module
      * @param playlistDetails   playlist details mapping for caching
-     * @param uri               playlist URI to display details for
+     * @param id                playlist id to display details for
      */
-    function PlaylistDetailsDialogController($scope, $mdDialog, playlistDetails, uri) {
+    function PlaylistDetailsDialogController($scope, $mdDialog, playlistDetails, id) {
         $scope.hide = function () {
             $mdDialog.hide();
         };
 
-        if (uri in playlistDetails) {
-            $scope.playlist = playlistDetails[uri];
+        if (id in playlistDetails) {
+            $scope.playlist = playlistDetails[id];
         } else {
             var successHandler = function (response) {
                 if (response.data !== null || response.data !== "") {
-                    playlistDetails[uri] = response.data;
+                    playlistDetails[id] = response.data;
                     $scope.playlist = response.data;
                 }
             };
 
-            console.log(uri)
-            rest.getData(_formatString(endpoints.GET_PLAYLIST_DETAILS, [uri]), null,
+            rest.getData(_formatString(endpoints.GET_PLAYLIST_DETAILS, [id]), null,
                 successHandler, "Unable to retrieve details for playlist");
         }
     }
@@ -139,7 +138,7 @@ app.controller('controller', ['$scope', '$http', '$mdDialog', 'rest', 'endpoints
      */
     $scope.submitForm = function (event) {
         $scope.selectedPlaylists.forEach(function (playlist) {
-            $scope.submissionForm.playlistUris[playlist.uri] = playlist.tracks.total;
+            $scope.submissionForm.playlistIds[playlist.id] = playlist.tracks.total;
         });
 
         var description = $scope.submissionForm.description;
@@ -193,12 +192,24 @@ app.controller('controller', ['$scope', '$http', '$mdDialog', 'rest', 'endpoints
         var successHandler = function (response) {
             $scope.existingPlaylists = response.data;
             if ($scope.existingPlaylists.length > 0) {
-                $scope.submissionForm.playlistToOverwrite = $scope.existingPlaylists[0].uri;
+                $scope.submissionForm.playlistToOverwrite = $scope.existingPlaylists[0].id;
             }
         };
 
         rest.getData(endpoints.GET_EXISTING_PLAYLISTS, null, successHandler,
             "Unable to retrieve existing playlists for current user");
+    };
+
+    $scope.deleteSavedPlaylist = function(id, event) {
+        console.log("hey");
+        var successHandler = function (response) {
+            $scope.existingPlaylists.filter(function (playlist) {
+                return playlist.id !== id;
+            });
+        };
+
+        rest.deleteData(endpoints.DELETE_EXISTING_PLAYLIST, {id: id}, successHandler,
+            "Unable to delete saved playlist");
     };
 
     /**

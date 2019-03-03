@@ -1,6 +1,6 @@
 package com.omwan.latestadditions.component;
 
-import com.omwan.latestadditions.dto.PlaylistUri;
+import com.omwan.latestadditions.dto.PlaylistIdWrapper;
 import com.omwan.latestadditions.mongo.UserPlaylist;
 import com.omwan.latestadditions.mongo.UserPlaylistRepository;
 import mockit.Expectations;
@@ -33,7 +33,7 @@ public class UserPlaylistComponentTest {
 
     /**
      * Assert that the user playlist objects returned by the repository
-     * are appropriately converted into PlaylistUri objects.
+     * are appropriately converted into PlaylistIdWrapper objects.
      */
     @Test
     public void testGetPlaylistsForUser() {
@@ -47,9 +47,9 @@ public class UserPlaylistComponentTest {
             returns(Collections.singletonList(expected));
         }};
 
-        List<PlaylistUri> actual = userPlaylistComponent.getPlaylistsForUser(userId);
+        List<PlaylistIdWrapper> actual = userPlaylistComponent.getPlaylistsForUser(userId);
         assertTrue(actual.size() > 0);
-        PlaylistUri playlist = actual.get(0);
+        PlaylistIdWrapper playlist = actual.get(0);
         assertEquals(playlist.toString(), playlistUri);
     }
 
@@ -62,7 +62,7 @@ public class UserPlaylistComponentTest {
         final String playlistUri = "spotify:user:123:playlist:456";
 
         new Expectations() {{
-            userPlaylistRepository.deleteByPlaylistUri(playlistUri);
+            userPlaylistRepository.deleteByPlaylistId(playlistUri);
             returns(1);
         }};
 
@@ -78,7 +78,7 @@ public class UserPlaylistComponentTest {
         final String playlistUri = "spotify:user:123:playlist:456";
 
         new Expectations() {{
-            userPlaylistRepository.deleteByPlaylistUri(playlistUri);
+            userPlaylistRepository.deleteByPlaylistId(playlistUri);
             returns(0);
         }};
 
@@ -95,7 +95,7 @@ public class UserPlaylistComponentTest {
     private UserPlaylist createMockedUserPlaylist(String userId, String playlistUri) {
         UserPlaylist userPlaylist = new UserPlaylist();
         userPlaylist.setUserId(userId);
-        userPlaylist.setPlaylistUri(playlistUri);
+        userPlaylist.setPlaylistId(playlistUri);
         return userPlaylist;
     }
 }

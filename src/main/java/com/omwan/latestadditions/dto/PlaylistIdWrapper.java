@@ -1,9 +1,9 @@
 package com.omwan.latestadditions.dto;
 
 /**
- * Wrapper class for playlist URI strings.
+ * Wrapper class for playlist IDs and user info.
  */
-public class PlaylistUri {
+public class PlaylistIdWrapper {
 
     private String userId;
     private String playlistId;
@@ -11,7 +11,7 @@ public class PlaylistUri {
     private int skipCount;
     private int offset;
 
-    public PlaylistUri() {
+    public PlaylistIdWrapper() {
 
     }
 
@@ -29,11 +29,6 @@ public class PlaylistUri {
 
     public void setPlaylistId(String playlistId) {
         this.playlistId = playlistId;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("spotify:user:%s:playlist:%s", userId, playlistId);
     }
 
     public int getSkipCount() {

@@ -9,14 +9,14 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class UserPlaylist {
 
     private String userId;
-    private String playlistUri;
+    private String playlistId;
 
     public UserPlaylist() {
     }
 
-    public UserPlaylist(String userId, String playlistUri) {
+    public UserPlaylist(String userId, String playlistId) {
         this.userId = userId;
-        this.playlistUri = playlistUri;
+        this.playlistId = playlistId;
     }
 
     public String getUserId() {
@@ -27,11 +27,11 @@ public class UserPlaylist {
         this.userId = userId;
     }
 
-    public String getPlaylistUri() {
-        return playlistUri;
+    public String getPlaylistId() {
+        return playlistId;
     }
 
-    public void setPlaylistUri(String playlistUri) {
-        this.playlistUri = playlistUri;
+    public void setPlaylistId(String playlistId) {
+        this.playlistId = playlistId;
     }
 }

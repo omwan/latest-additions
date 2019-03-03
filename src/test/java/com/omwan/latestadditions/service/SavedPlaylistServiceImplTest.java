@@ -3,7 +3,7 @@ package com.omwan.latestadditions.service;
 
 import com.omwan.latestadditions.SpotifyTestUtils;
 import com.omwan.latestadditions.component.SpotifyApiComponent;
-import com.omwan.latestadditions.component.UriUtils;
+import com.omwan.latestadditions.component.PlaylistUtils;
 import com.omwan.latestadditions.component.UserPlaylistComponent;
 import com.wrapper.spotify.model_objects.specification.Playlist;
 import com.wrapper.spotify.requests.data.AbstractDataRequest;
@@ -57,7 +57,7 @@ public class SavedPlaylistServiceImplTest {
             returns(userId);
 
             userPlaylistComponent.getPlaylistsForUser(userId);
-            returns(Collections.singletonList(UriUtils.buildPlaylistUri(playlistUri)));
+            returns(Collections.singletonList(PlaylistUtils.buildPlaylistWrapper(playlistUri, userId)));
 
             spotifyApiComponent.getApiWithTokens();
             returns(SpotifyTestUtils.buildMockedSpotifyApi());

@@ -20,10 +20,10 @@ public interface UserPlaylistRepository extends MongoRepository<UserPlaylist, St
     List<UserPlaylist> findByUserId(String userId);
 
     /**
-     * Delete a docuemnt with the given playlist uri.
+     * Delete a document with the given playlist ID.
      *
-     * @param playlistUri uri of playlist to delete
+     * @param playlistId ID of playlist to delete
      * @return number of deleted documents
      */
-    int deleteByPlaylistUri(String playlistUri);
+    int deleteByPlaylistId(String playlistId);
 }

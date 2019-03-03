@@ -11,5 +11,5 @@ public interface SavedPlaylistService {
 
     List<Playlist> getExistingPlaylists();
 
-    void deleteSavedPlaylist(String playlistUri);
+    void deleteSavedPlaylist(String playlistId);
 }
