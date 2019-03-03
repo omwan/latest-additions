@@ -58,7 +58,7 @@
 <!-- form contents -->
 <md-content class="form-content">
 <form>
-    
+
 <!-- new playlist information -->
 <div class="new-playlist-details">
 
@@ -102,8 +102,15 @@
 <div ng-if="submissionForm.overwriteExisting && existingPlaylists.length > 0" style="width:100%">
     <div>
         <md-radio-group ng-model="submissionForm.playlistToOverwrite">
-            <md-radio-button ng-value="playlist.uri" ng-model="submissionForm.playlistToOverwrite" ng-repeat="playlist in existingPlaylists">
-                {{playlist.name}} | {{playlist.tracks.total}} tracks
+            <md-radio-button ng-value="playlist.id" ng-model="submissionForm.playlistToOverwrite" ng-repeat="playlist in existingPlaylists">
+                <table cellpadding="0" cellspacing="0" width="100%"><tr>
+                    <td>{{playlist.name}} | {{playlist.tracks.total}} tracks</td>
+                    <td width="50px">
+                        <a href="javascript:void(0)" ng-click="deleteSavedPlaylist(playlist.uri, $event)">
+                            delete
+                        </a>
+                    </td>
+                </tr></table>
             </md-radio-button>
         </md-radio-group>
     </div>
@@ -164,7 +171,7 @@
             <table cellpadding="0" cellspacing="0" width="100%"><tr>
                 <td><md-checkbox ng-checked="exists(playlist, selectedPlaylists)" ng-click="toggle(playlist, selectedPlaylists)" aria-label="playlist.name">
 
-                    {{playlist.name}} | 
+                    {{playlist.name}} |
                     <span ng-if="playlist.owner.displayName !== null">
                         {{playlist.owner.displayName}}
                     </span>
@@ -175,8 +182,10 @@
 
                 </md-checkbox></td>
 
-                <td width="50px"><a href="javascript:void(0)" class="playlist-info" ng-click="getPlaylistDetails(playlist.uri, $event)" aria-label="playlist info for {{name}}">
-                    
+                <td width="50px"><a href="javascript:void(0)" class="playlist-info"
+                                    ng-click="getPlaylistDetails(playlist.id, $event)"
+                                    aria-label="playlist info for {{name}}">
+
                     <md-tooltip md-direction="right">Playlist Info</md-tooltip>
                     <i class="fa fa-info-circle"></i>
 
@@ -212,7 +221,7 @@
 <div class="footer">
     <p>
         © Olivia Wan 2018, all rights reserved &middot;
-        <a href="https://github.com/omwan/latest-additions" target="_blank">Github</a> &middot; 
+        <a href="https://github.com/omwan/latest-additions" target="_blank">Github</a> &middot;
         <a href="/swagger-ui.html" target="_blank">Swagger</a>
     </p>
 </div>

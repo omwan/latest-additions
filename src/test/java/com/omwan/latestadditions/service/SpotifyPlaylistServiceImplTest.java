@@ -80,18 +80,21 @@ public class SpotifyPlaylistServiceImplTest {
      */
     @Test
     public void testGetPlaylistDetails() throws Exception {
-        final String playlistUri = "spotify:user:123:playlist:456";
+        final String playlistId = "playlist ID";
 
         new Expectations() {{
             spotifyApiComponent.getApiWithTokens();
             returns(SpotifyTestUtils.buildMockedSpotifyApi());
 
+            spotifyApiComponent.getCurrentUserId();
+            returns("user ID");
+
             spotifyApiComponent.executeRequest((AbstractDataRequest) any, anyString);
-            returns(SpotifyTestUtils.buildMockedPlaylist(playlistUri));
+            returns(SpotifyTestUtils.buildMockedPlaylist(playlistId));
         }};
 
-        Playlist actual = spotifyPlaylistService.getPlaylistDetails(playlistUri);
-        assertEquals(playlistUri, actual.getUri());
+        Playlist actual = spotifyPlaylistService.getPlaylistDetails(playlistId);
+        assertEquals(playlistId, actual.getId());
     }
 
     /**

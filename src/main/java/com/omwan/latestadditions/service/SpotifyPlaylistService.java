@@ -13,7 +13,7 @@ public interface SpotifyPlaylistService {
 
     Paging<PlaylistSimplified> getUserPlaylists(int limit, int offset);
 
-    Playlist getPlaylistDetails(String playlistUri);
+    Playlist getPlaylistDetails(String playlistId);
 
     LatestPlaylistResponse buildLatestAdditionsPlaylist(BuildPlaylistRequest request);
 }

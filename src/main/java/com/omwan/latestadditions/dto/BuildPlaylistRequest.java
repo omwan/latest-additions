@@ -7,7 +7,7 @@ import java.util.Map;
  */
 public class BuildPlaylistRequest {
 
-    private Map<String, Integer> playlistUris;
+    private Map<String, Integer> playlistIds;
     private boolean overwriteExisting;
     private String playlistName;
     private int numTracks;
@@ -16,12 +16,12 @@ public class BuildPlaylistRequest {
     private boolean isCollaborative;
     private String playlistToOverwrite;
 
-    public Map<String, Integer> getPlaylistUris() {
-        return playlistUris;
+    public Map<String, Integer> getPlaylistIds() {
+        return playlistIds;
     }
 
-    public void setPlaylistUris(Map<String, Integer> playlistUris) {
-        this.playlistUris = playlistUris;
+    public void setPlaylistIds(Map<String, Integer> playlistIds) {
+        this.playlistIds = playlistIds;
     }
 
     public boolean isOverwriteExisting() {

@@ -1,11 +1,10 @@
 package com.omwan.latestadditions.service;
 
 import com.omwan.latestadditions.component.SpotifyApiComponent;
-import com.omwan.latestadditions.component.UriUtils;
 import com.omwan.latestadditions.component.UserPlaylistComponent;
 import com.omwan.latestadditions.dto.BuildPlaylistRequest;
 import com.omwan.latestadditions.dto.LatestPlaylistResponse;
-import com.omwan.latestadditions.dto.PlaylistUri;
+import com.omwan.latestadditions.dto.PlaylistIdWrapper;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.model_objects.specification.Paging;
 import com.wrapper.spotify.model_objects.specification.Playlist;
@@ -64,23 +63,23 @@ public class SpotifyPlaylistServiceImpl implements SpotifyPlaylistService {
     /**
      * Get details for a given playlist.
      *
-     * @param playlistUri string containing user and playlist IDs
+     * @param playlistId string containing user and playlist IDs
      * @return playlist details object for given user and playlist ID
      */
     @Override
-    public Playlist getPlaylistDetails(String playlistUri) {
+    public Playlist getPlaylistDetails(String playlistId) {
         String fields = String.join(",", Arrays.asList("description",
                 "external_urls", "href", "images", "name", "owner",
                 "tracks.total", "uri", "isCollaborative", "isPublicAccess"));
-        PlaylistUri playlistURIWrapper = UriUtils.buildPlaylistUri(playlistUri);
 
         SpotifyApi spotifyApi = spotifyApiComponent.getApiWithTokens();
+        String userId = spotifyApiComponent.getCurrentUserId();
 
         AbstractDataRequest playlistDetailsRequest = spotifyApi
-                .getPlaylist(playlistURIWrapper.getUserId(), playlistURIWrapper.getPlaylistId())
+                .getPlaylist(userId, playlistId)
                 .fields(fields)
                 .build();
-        String errorMessage = "Unable to retrieve playlist details for playlist " + playlistUri;
+        String errorMessage = "Unable to retrieve playlist details for playlist " + playlistId;
         return spotifyApiComponent.executeRequest(playlistDetailsRequest, errorMessage);
     }
 
@@ -88,15 +87,17 @@ public class SpotifyPlaylistServiceImpl implements SpotifyPlaylistService {
      * Create or update latest additions playlist with the specified requirements.
      *
      * @param request playlist specifications
-     * @return URI of created or updated playlist
+     * @return track preview for created/updated playlist
      */
     @Override
     public LatestPlaylistResponse buildLatestAdditionsPlaylist(BuildPlaylistRequest request) {
-        List<PlaylistUri> playlists = request.getPlaylistUris().keySet().stream()
-                .map(UriUtils::buildPlaylistUri)
+        String userId = spotifyApiComponent.getCurrentUserId();
+        List<PlaylistIdWrapper> playlists = request.getPlaylistIds().keySet().stream()
+                .map((String playlistId) -> new PlaylistIdWrapper(playlistId, userId))
                 .collect(Collectors.toList());
 
-        Map<PlaylistUri, LinkedList<PlaylistTrack>> playlistTracks = getPlaylistTracks(request, playlists);
+        Map<PlaylistIdWrapper, LinkedList<PlaylistTrack>> playlistTracks =
+                getPlaylistTracks(request, playlists);
 
         List<PlaylistTrack> latestAdditionsTracks = getLatestAdditions(request, playlistTracks);
         String[] trackUris = latestAdditionsTracks.stream()
@@ -104,29 +105,28 @@ public class SpotifyPlaylistServiceImpl implements SpotifyPlaylistService {
                 .collect(Collectors.toList())
                 .toArray(new String[latestAdditionsTracks.size()]);
 
-        String userId = spotifyApiComponent.getCurrentUserId();
-        PlaylistUri uri;
+        PlaylistIdWrapper playlistWrapper;
         if (request.isOverwriteExisting()) {
-            uri = overwriteExistingLatestAdditions(request.getPlaylistToOverwrite(), trackUris, userId);
+            playlistWrapper = overwriteExistingLatestAdditions(request.getPlaylistToOverwrite(), trackUris, userId);
         } else {
-            uri = createNewLatestAdditions(trackUris, userId, request);
+            playlistWrapper = createNewLatestAdditions(trackUris, userId, request);
         }
-        return buildTrackPreviewResponse(uri, latestAdditionsTracks);
+        return buildTrackPreviewResponse(playlistWrapper, latestAdditionsTracks);
     }
 
     /**
      * Build a response object containing a link to the newly generated or updated playlist,
      * as well as a preview the tracks in the playlist.
      *
-     * @param uri    uri for playlist
-     * @param tracks list of tracks in playlist
+     * @param playlistWrapper playlist info
+     * @param tracks          list of tracks in playlist
      * @return response object
      */
-    private LatestPlaylistResponse buildTrackPreviewResponse(PlaylistUri uri,
+    private LatestPlaylistResponse buildTrackPreviewResponse(PlaylistIdWrapper playlistWrapper,
                                                              List<PlaylistTrack> tracks) {
         LatestPlaylistResponse response = new LatestPlaylistResponse();
         response.setPlaylistUrl(String.format("https://open.spotify.com/user/%s/playlist/%s",
-                uri.getUserId(), uri.getPlaylistId()));
+                playlistWrapper.getUserId(), playlistWrapper.getPlaylistId()));
         response.setTracklistPreview(tracks.subList(0, Math.min(tracks.size(), 10)));
         return response;
     }
@@ -138,13 +138,13 @@ public class SpotifyPlaylistServiceImpl implements SpotifyPlaylistService {
      * @param playlists playlists to retrieve tracks for
      * @return mapping of playlists to their tracks
      */
-    private Map<PlaylistUri, LinkedList<PlaylistTrack>> getPlaylistTracks(BuildPlaylistRequest request,
-                                                                          List<PlaylistUri> playlists) {
-        Map<PlaylistUri, LinkedList<PlaylistTrack>> playlistTracks = new HashMap<>();
+    private Map<PlaylistIdWrapper, LinkedList<PlaylistTrack>> getPlaylistTracks(BuildPlaylistRequest request,
+                                                                                List<PlaylistIdWrapper> playlists) {
+        Map<PlaylistIdWrapper, LinkedList<PlaylistTrack>> playlistTracks = new HashMap<>();
 
-        for (PlaylistUri playlist : playlists) {
+        for (PlaylistIdWrapper playlist : playlists) {
             int limit = request.getNumTracks();
-            int playlistSize = request.getPlaylistUris().get(playlist.toString());
+            int playlistSize = request.getPlaylistIds().get(playlist.getPlaylistId());
             int offset = playlistSize - request.getNumTracks();
             if (offset < 0) {
                 offset = 0;
@@ -161,18 +161,18 @@ public class SpotifyPlaylistServiceImpl implements SpotifyPlaylistService {
      * Generate a list of "latest additions" tracks from the given set of playlists.
      *
      * @param request        playlist specifications
-     * @param playlistTracks mapping of playlist URIs to their tracks
+     * @param playlistTracks mapping of playlist IDs to their tracks
      * @return list of tracks for latest additions playlist
      */
     private List<PlaylistTrack> getLatestAdditions(BuildPlaylistRequest request,
-                                                   Map<PlaylistUri, LinkedList<PlaylistTrack>> playlistTracks) {
+                                                   Map<PlaylistIdWrapper, LinkedList<PlaylistTrack>> playlistTracks) {
         List<PlaylistTrack> latestAdditionsTracks = new ArrayList<>();
 
         PlaylistTrack lastAdded = null;
-        PlaylistUri lastAddedPlaylist = null;
+        PlaylistIdWrapper lastAddedPlaylist = null;
 
-        Map<PlaylistUri, PlaylistTrack> lastAddedTracks = new HashMap<>();
-        for (PlaylistUri playlist : playlistTracks.keySet()) {
+        Map<PlaylistIdWrapper, PlaylistTrack> lastAddedTracks = new HashMap<>();
+        for (PlaylistIdWrapper playlist : playlistTracks.keySet()) {
             playlist.setSkipCount(0);
             lastAddedTracks.put(playlist, getNextTrack(playlist, playlistTracks,
                     lastAddedTracks.values()));
@@ -180,7 +180,7 @@ public class SpotifyPlaylistServiceImpl implements SpotifyPlaylistService {
 
         int count = 0;
         while (count < request.getNumTracks()) {
-            for (PlaylistUri playlist : lastAddedTracks.keySet()) {
+            for (PlaylistIdWrapper playlist : lastAddedTracks.keySet()) {
                 if (lastAddedTracks.get(playlist) != null) {
                     if (lastAdded == null) {
                         lastAdded = lastAddedTracks.get(playlist);
@@ -219,8 +219,8 @@ public class SpotifyPlaylistServiceImpl implements SpotifyPlaylistService {
      * @param comparedTracks   tracks to compare for duplicates
      * @return next track for the given playlist
      */
-    private PlaylistTrack getNextTrack(PlaylistUri playlist,
-                                       Map<PlaylistUri, LinkedList<PlaylistTrack>> playlistTrackMap,
+    private PlaylistTrack getNextTrack(PlaylistIdWrapper playlist,
+                                       Map<PlaylistIdWrapper, LinkedList<PlaylistTrack>> playlistTrackMap,
                                        Collection<PlaylistTrack> comparedTracks) {
         LinkedList<PlaylistTrack> playlistTracks = playlistTrackMap.get(playlist);
         if (!(playlistTracks.isEmpty())) {
@@ -276,19 +276,19 @@ public class SpotifyPlaylistServiceImpl implements SpotifyPlaylistService {
      * @param trackUris           list of track URIs for playlist
      * @param userId              user ID of current user
      */
-    private PlaylistUri overwriteExistingLatestAdditions(String playlistToOverwrite,
-                                                         String[] trackUris,
-                                                         String userId) {
+    private PlaylistIdWrapper overwriteExistingLatestAdditions(String playlistToOverwrite,
+                                                               String[] trackUris,
+                                                               String userId) {
         SpotifyApi spotifyApi = spotifyApiComponent.getApiWithTokens();
-        PlaylistUri playlistUri = UriUtils.buildPlaylistUri(playlistToOverwrite);
+        PlaylistIdWrapper playlistIdWrapper = new PlaylistIdWrapper(playlistToOverwrite, userId);
         AbstractDataRequest replaceTracksRequest = spotifyApi
-                .replacePlaylistsTracks(userId, playlistUri.getPlaylistId(), trackUris)
+                .replacePlaylistsTracks(userId, playlistIdWrapper.getPlaylistId(), trackUris)
                 .build();
 
-        String errorMessage = "Unable to replace tracks for playlist %s" + playlistUri;
+        String errorMessage = "Unable to replace tracks for playlist %s" + playlistIdWrapper;
         spotifyApiComponent.executeRequest(replaceTracksRequest, errorMessage);
 
-        return playlistUri;
+        return playlistIdWrapper;
     }
 
     /**
@@ -298,9 +298,9 @@ public class SpotifyPlaylistServiceImpl implements SpotifyPlaylistService {
      * @param userId    user ID of current user
      * @param request   playlist specifications
      */
-    private PlaylistUri createNewLatestAdditions(String[] trackUris,
-                                                 String userId,
-                                                 BuildPlaylistRequest request) {
+    private PlaylistIdWrapper createNewLatestAdditions(String[] trackUris,
+                                                       String userId,
+                                                       BuildPlaylistRequest request) {
         SpotifyApi spotifyApi = spotifyApiComponent.getApiWithTokens();
         AbstractDataRequest createPlaylistRequest = spotifyApi
                 .createPlaylist(userId, request.getPlaylistName())
@@ -314,36 +314,36 @@ public class SpotifyPlaylistServiceImpl implements SpotifyPlaylistService {
         Playlist latestAdditions = spotifyApiComponent.executeRequest(createPlaylistRequest,
                 createPlaylistErrorMessage);
 
-        PlaylistUri playlistUri = UriUtils.buildPlaylistUri(latestAdditions.getUri());
+        PlaylistIdWrapper playlistIdWrapper = new PlaylistIdWrapper(latestAdditions.getId(), userId);
         AbstractDataRequest addTracksRequest = spotifyApi
-                .addTracksToPlaylist(userId, playlistUri.getPlaylistId(), trackUris)
+                .addTracksToPlaylist(userId, playlistIdWrapper.getPlaylistId(), trackUris)
                 .build();
 
-        String addTracksErrorMessage = "Unable to add tracks to playlist " + playlistUri;
+        String addTracksErrorMessage = "Unable to add tracks to playlist " + playlistIdWrapper.getPlaylistId();
         spotifyApiComponent.executeRequest(addTracksRequest, addTracksErrorMessage);
-        userPlaylistComponent.saveUserPlaylist(userId, playlistUri.toString());
+        userPlaylistComponent.saveUserPlaylist(userId, playlistIdWrapper.getPlaylistId());
 
-        return playlistUri;
+        return playlistIdWrapper;
     }
 
     /**
      * Retrieve the tracks for an individual playlist.
      *
-     * @param uri    URI of playlist to retrieve tracks for
-     * @param limit  maximum number of tracks to retrieve
-     * @param offset offset to start retrieving tracks from
+     * @param playlistWrapper wrapper object of playlist to retrieve tracks for
+     * @param limit           maximum number of tracks to retrieve
+     * @param offset          offset to start retrieving tracks from
      * @return array of playlist tracks
      */
-    private PlaylistTrack[] getTracksForPlaylist(PlaylistUri uri, int limit, int offset) {
+    private PlaylistTrack[] getTracksForPlaylist(PlaylistIdWrapper playlistWrapper, int limit, int offset) {
         SpotifyApi spotifyApi = spotifyApiComponent.getApiWithTokens();
 
         AbstractDataRequest trackRequest = spotifyApi
-                .getPlaylistsTracks(uri.getUserId(), uri.getPlaylistId())
+                .getPlaylistsTracks(playlistWrapper.getUserId(), playlistWrapper.getPlaylistId())
                 .limit(limit)
                 .offset(offset)
                 .build();
 
-        String errorMessage = "Unable to retrieve tracks for playlist " + uri.toString();
+        String errorMessage = "Unable to retrieve tracks for playlist " + playlistWrapper.toString();
         Paging<PlaylistTrack> tracks = spotifyApiComponent.executeRequest(trackRequest, errorMessage);
         return tracks.getItems();
     }

@@ -29,12 +29,12 @@ public class SpotifyTestUtils {
     /**
      * Create a mocked instance of a playlist with the given URI.
      *
-     * @param playlistUri uri for playlist
+     * @param playlistId uri for playlist
      * @return mocked playlist
      */
-    public static Playlist buildMockedPlaylist(String playlistUri) {
+    public static Playlist buildMockedPlaylist(String playlistId) {
         return new Playlist.Builder()
-                .setUri(playlistUri)
+                .setId(playlistId)
                 .build();
     }
 }

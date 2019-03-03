@@ -1,6 +1,6 @@
 package com.omwan.latestadditions.component;
 
-import com.omwan.latestadditions.dto.PlaylistUri;
+import com.omwan.latestadditions.dto.PlaylistIdWrapper;
 import com.omwan.latestadditions.mongo.UserPlaylist;
 import com.omwan.latestadditions.mongo.UserPlaylistRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,40 +19,40 @@ public class UserPlaylistComponent {
     private UserPlaylistRepository userPlaylistRepository;
 
     /**
-     * Retrieve URIs of all saved playlists for a given user.
+     * Retrieve IDs of all saved playlists for a given user.
      *
      * @param userId user ID to retrieve playlists for
-     * @return list of playlist URIs.
+     * @return list of playlist wrapper objects.
      */
-    public List<PlaylistUri> getPlaylistsForUser(String userId) {
+    public List<PlaylistIdWrapper> getPlaylistsForUser(String userId) {
         return userPlaylistRepository.findByUserId(userId).stream()
-                .map(userPlaylist -> UriUtils.buildPlaylistUri(userPlaylist.getPlaylistUri()))
+                .map(userPlaylist -> new PlaylistIdWrapper(userPlaylist.getPlaylistId(), userId))
                 .collect(Collectors.toList());
     }
 
     /**
-     * Save a playlist URI for a given user.
+     * Save a playlist for a given user.
      *
-     * @param userId      user ID to save playlist for
-     * @param playlistUri playlist to save
+     * @param userId     user ID to save playlist for
+     * @param playlistId ID of playlist to save
      */
-    public UserPlaylist saveUserPlaylist(String userId, String playlistUri) {
+    public UserPlaylist saveUserPlaylist(String userId, String playlistId) {
         UserPlaylist userPlaylist = new UserPlaylist();
         userPlaylist.setUserId(userId);
-        userPlaylist.setPlaylistUri(playlistUri);
+        userPlaylist.setPlaylistId(playlistId);
         return userPlaylistRepository.save(userPlaylist);
     }
 
     /**
-     * Delete the playlist with the given URI. If no playlists are found matching
-     * the given URI, an exception is thrown.
+     * Delete the playlist with the given ID. If no playlists are found matching
+     * the given ID, an exception is thrown.
      *
-     * @param playlistUri URI of playlist to delete.
+     * @param playlistId ID of playlist to delete.
      */
-    public void deleteSavedPlaylist(String playlistUri) {
-        int deletedCount = userPlaylistRepository.deleteByPlaylistUri(playlistUri);
+    public void deleteSavedPlaylist(String playlistId) {
+        int deletedCount = userPlaylistRepository.deleteByPlaylistId(playlistId);
         if (deletedCount != 1) {
-            throw new IllegalArgumentException("No saved playlists found with URI " + playlistUri);
+            throw new IllegalArgumentException("No saved playlists found with ID " + playlistId);
         }
     }
 }

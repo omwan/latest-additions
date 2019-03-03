@@ -30,9 +30,9 @@ public class SpotifyPlaylistController {
         return spotifyPlaylistService.getUserPlaylists(limit, offset);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/{uri}")
-    public Playlist getPlaylistDetails(@PathVariable(name = "uri") String playlistUri) {
-        return spotifyPlaylistService.getPlaylistDetails(playlistUri);
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}")
+    public Playlist getPlaylistDetails(@PathVariable(name = "id") String playlistId) {
+        return spotifyPlaylistService.getPlaylistDetails(playlistId);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "")

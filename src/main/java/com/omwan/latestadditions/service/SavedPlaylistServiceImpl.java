@@ -2,7 +2,7 @@ package com.omwan.latestadditions.service;
 
 import com.omwan.latestadditions.component.SpotifyApiComponent;
 import com.omwan.latestadditions.component.UserPlaylistComponent;
-import com.omwan.latestadditions.dto.PlaylistUri;
+import com.omwan.latestadditions.dto.PlaylistIdWrapper;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.model_objects.specification.Playlist;
 import com.wrapper.spotify.requests.data.AbstractDataRequest;
@@ -27,11 +27,11 @@ public class SavedPlaylistServiceImpl implements SavedPlaylistService {
     /**
      * Delete a previously saved playlist from application.
      *
-     * @param playlistUri uri of playlist to delete
+     * @param playlistId ID of playlist to delete
      */
     @Override
-    public void deleteSavedPlaylist(String playlistUri) {
-        userPlaylistComponent.deleteSavedPlaylist(playlistUri);
+    public void deleteSavedPlaylist(String playlistId) {
+        userPlaylistComponent.deleteSavedPlaylist(playlistId);
     }
 
 
@@ -48,13 +48,13 @@ public class SavedPlaylistServiceImpl implements SavedPlaylistService {
         }
 
         String userId = spotifyApiComponent.getCurrentUserId();
-        List<PlaylistUri> playlistsUris = userPlaylistComponent.getPlaylistsForUser(userId);
+        List<PlaylistIdWrapper> playlistWrappers = userPlaylistComponent.getPlaylistsForUser(userId);
 
         List<Playlist> existingPlaylists = new ArrayList<>();
 
-        for (PlaylistUri uri : playlistsUris) {
+        for (PlaylistIdWrapper wrapper : playlistWrappers) {
             SpotifyApi spotifyApi = spotifyApiComponent.getApiWithTokens();
-            AbstractDataRequest getPlaylistRequest = spotifyApi.getPlaylist(userId, uri.getPlaylistId())
+            AbstractDataRequest getPlaylistRequest = spotifyApi.getPlaylist(userId, wrapper.getPlaylistId())
                     .fields("name,tracks(total),uri,id")
                     .build();
             String errorMessage = "Unable to retrieve existing playlists for user " + userId;
