@@ -1,8 +1,8 @@
 package com.omwan.latestadditions.component;
 
+import com.omwan.latestadditions.db.UserPlaylistRepository;
 import com.omwan.latestadditions.dto.PlaylistIdWrapper;
-import com.omwan.latestadditions.mongo.UserPlaylist;
-import com.omwan.latestadditions.mongo.UserPlaylistRepository;
+import com.omwan.latestadditions.db.UserPlaylist;
 import mockit.Expectations;
 import mockit.Injectable;
 import mockit.Tested;

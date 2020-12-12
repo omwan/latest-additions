@@ -1,8 +1,8 @@
 package com.omwan.latestadditions.component;
 
+import com.omwan.latestadditions.db.UserPlaylistRepository;
 import com.omwan.latestadditions.dto.PlaylistIdWrapper;
-import com.omwan.latestadditions.mongo.UserPlaylist;
-import com.omwan.latestadditions.mongo.UserPlaylistRepository;
+import com.omwan.latestadditions.db.UserPlaylist;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,11 +36,11 @@ public class UserPlaylistComponent {
      * @param userId     user ID to save playlist for
      * @param playlistId ID of playlist to save
      */
-    public UserPlaylist saveUserPlaylist(String userId, String playlistId) {
+    public void saveUserPlaylist(String userId, String playlistId) {
         UserPlaylist userPlaylist = new UserPlaylist();
         userPlaylist.setUserId(userId);
         userPlaylist.setPlaylistId(playlistId);
-        return userPlaylistRepository.save(userPlaylist);
+        userPlaylistRepository.save(userPlaylist);
     }
 
     /**
