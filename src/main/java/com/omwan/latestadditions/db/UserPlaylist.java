@@ -1,11 +1,8 @@
-package com.omwan.latestadditions.mongo;
-
-import org.springframework.data.mongodb.core.mapping.Document;
+package com.omwan.latestadditions.db;
 
 /**
  * Document class to represent data in "userPlaylist" Mongo collection.
  */
-@Document(collection = "userPlaylist")
 public class UserPlaylist {
 
     private String userId;
