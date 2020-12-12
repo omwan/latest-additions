@@ -1,7 +1,7 @@
 package com.omwan.latestadditions.db;
 
 /**
- * Document class to represent data in "userPlaylist" Mongo collection.
+ * Class to represent data in user_playlist table.
  */
 public class UserPlaylist {
 

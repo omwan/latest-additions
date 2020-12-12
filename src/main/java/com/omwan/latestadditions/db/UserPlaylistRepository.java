@@ -13,6 +13,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class to access sqlite database for user playlist data.
+ */
 @Component
 public class UserPlaylistRepository {
     private static final Logger s_Logger = LogManager.getLogger();
